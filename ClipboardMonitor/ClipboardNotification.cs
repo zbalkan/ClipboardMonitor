@@ -56,8 +56,10 @@ namespace ClipboardMonitor
 
                         foreach (var suspectedPAN in matches)
                         {
-                            // Write to event log
-                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ProcessPath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}", 20);
+                            if (PAN.Validate(suspectedPAN, out var cardType))
+                            {
+                                Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ProcessPath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}\nProbably card type: {Enum.GetName(cardType)}", 20);
+                            }
                         }
 
                         // Display a notification

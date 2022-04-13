@@ -1,6 +1,7 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 
 [assembly: CLSCompliant(true)]
@@ -94,6 +95,8 @@ namespace ClipboardMonitor
             }
 
             base.OnStartup(e);
+            
+            SetupExceptionHandling();
 
             //create the notify icon (it's a resource declared in NotifyIconResources.xaml
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
@@ -104,8 +107,43 @@ namespace ClipboardMonitor
         protected override void OnExit(ExitEventArgs e)
         {
             Logger.Instance.LogInfo($"ClipboardMonitor us shutting down.", 11);
-           
+
             base.OnExit(e);
+        }
+
+        private void SetupExceptionHandling()
+        {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
+
+            DispatcherUnhandledException += (s, e) => {
+                LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
+                e.Handled = true;
+            };
+
+            TaskScheduler.UnobservedTaskException += (s, e) => {
+                LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
+                e.SetObserved();
+            };
+        }
+
+        private static void LogUnhandledException(Exception exception, string source)
+        {
+            var message = $"Unhandled exception ({source})";
+            try
+            {
+                var assemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName();
+                message = $"Unhandled exception in { (object?)assemblyName.Name} v{ (object?)assemblyName.Version}";
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError($"Exception in LogUnhandledException.\n{ex}", 2);
+            }
+            finally
+            {
+                Logger.Instance.LogError($"{message}\n{exception}", 3);
+                Environment.Exit(1); // We don't want this to freeze
+            }
         }
 
         protected virtual void Dispose(bool disposing)
@@ -124,7 +162,6 @@ namespace ClipboardMonitor
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

@@ -108,8 +108,9 @@ namespace ClipboardMonitor
                 }
                 return default;
             }
-            catch
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.Message);
                 return default;
             }
         }

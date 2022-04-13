@@ -64,17 +64,16 @@ namespace ClipboardMonitor
 
         public bool Check()
         {
-#pragma warning disable CA1031 // Do not catch general exception types
             try
             {
                 var result = EventLog.SourceExists(SOURCE);
                 return result;
             }
-            catch
+            catch (System.Security.SecurityException ex)
             {
+                Debug.WriteLine(ex.Message);
                 return false;
             }
-#pragma warning restore CA1031 // Do not catch general exception types
         }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.

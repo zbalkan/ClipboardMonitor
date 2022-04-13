@@ -50,7 +50,7 @@ namespace ClipboardMonitor
                     var matches = PAN.ParseLine(content);
                     if (matches != null && matches.Count != 0)
                     {
-                        var processInfo = CaptureProcessInfo();
+                        var processInfo = ProcessHelper.CaptureProcessInfo();
 
                         Clipboard.SetText(_warningText);
 
@@ -58,7 +58,7 @@ namespace ClipboardMonitor
                         {
                             if (PAN.Validate(suspectedPAN, out var cardType))
                             {
-                                Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ProcessPath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}\nProbably card type: {Enum.GetName(cardType)}", 20);
+                                Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}\nProbably card type: {Enum.GetName(cardType)}", 20);
                             }
                         }
 
@@ -79,40 +79,6 @@ namespace ClipboardMonitor
             stringElements[1].AppendChild(toastXml.CreateTextNode(message));
             var toast = new ToastNotification(toastXml);
             ToastNotificationManager.CreateToastNotifier("ClipboardMonitor").Show(toast);
-        }
-
-        private static ProcessInformation CaptureProcessInfo()
-        {
-            try
-            {
-
-                var activeWindow = NativeMethods.GetForegroundWindow();
-
-                var length = NativeMethods.GetWindowTextLength(activeWindow);
-                var title = new StringBuilder(length + 1);
-                _ = NativeMethods.GetWindowText(activeWindow, title, title.Capacity);
-
-                _ = NativeMethods.GetWindowThreadProcessId(activeWindow, out var processId);
-                var process = Process.GetProcessById(processId);
-                if (process != null)
-                {
-                    var name = process.ProcessName;
-                    var path = process.MainModule != null ? process.MainModule.FileName : string.Empty;
-                    var pi = new ProcessInformation
-                    {
-                        ProcessName = name,
-                        ProcessPath = path ?? string.Empty,
-                        WindowTitle = title.ToString()
-                    };
-                    return pi;
-                }
-                return default;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-                return default;
-            }
         }
 
         public void Dispose()

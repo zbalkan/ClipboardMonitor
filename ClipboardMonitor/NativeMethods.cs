@@ -55,5 +55,17 @@ namespace ClipboardMonitor
 #pragma warning disable CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
         public static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
 #pragma warning restore CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
+
+        [DllImport("kernel32.dll")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern IntPtr GetCurrentProcess();
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern bool GetKernelObjectSecurity(IntPtr handle, int securityInformation, [Out] byte[] pSecurityDescriptor, uint nLength, out uint lpnLengthNeeded);
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern bool SetKernelObjectSecurity(IntPtr handle, int securityInformation, [In] byte[] pSecurityDescriptor);
     }
 }

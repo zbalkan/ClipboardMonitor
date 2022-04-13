@@ -18,7 +18,7 @@ namespace ClipboardMonitor
 
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
-        {
+        {          
             var args = Environment.GetCommandLineArgs();
 
             if (args != null && args.Length > 2)
@@ -93,6 +93,14 @@ namespace ClipboardMonitor
                 _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
                 Environment.Exit(0);
             }
+
+            if (ProcessHelper.IsDuplicate())
+            {
+                Logger.Instance.LogInfo($"Killing redundant ClipboardMonitor instance.", 15);
+                Environment.Exit(0);
+            }
+
+            ProcessHelper.Cover();
 
             base.OnStartup(e);
             

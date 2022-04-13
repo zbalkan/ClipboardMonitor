@@ -23,7 +23,7 @@
         ContextMenu="{StaticResource SysTrayMenu}"
         DoubleClickCommand="{Binding AboutCommand}"
         IconSource="Assets/icon.ico"
-        ToolTipText="Made by NETS Estonia">
+        ToolTipText="ClipboardMonitor is running in the background.">
 
         <!--  self-assign a data context (could also be done programmatically)  -->
         <tb:TaskbarIcon.DataContext>

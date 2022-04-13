@@ -76,7 +76,7 @@ namespace ClipboardMonitor
             stringElements[0].AppendChild(toastXml.CreateTextNode(title));
             stringElements[1].AppendChild(toastXml.CreateTextNode(message));
             var toast = new ToastNotification(toastXml);
-            ToastNotificationManager.CreateToastNotifier("NETS EE - ClipboardMonitor").Show(toast);
+            ToastNotificationManager.CreateToastNotifier("ClipboardMonitor").Show(toast);
         }
 
         private static ProcessInformation CaptureProcessInfo()

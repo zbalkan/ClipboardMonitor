@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ClipboardMonitor"
         mc:Ignorable="d"
-        Title="About" Height="160" Width="400">
+        Title="About" Height="160" Width="400" WindowStyle="ToolWindow" Topmost="True" ResizeMode="NoResize">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
@@ -19,7 +19,7 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Button Grid.Column="2" Content="OK" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="124" Click="Button_Click" Margin="66,36,0,0" Grid.RowSpan="2" IsDefault="True"/>
-        <TextBlock HorizontalAlignment="Left" Margin="16" TextWrapping="Wrap" Text="ClipboardMonitor tracks your clipboard and checks only PAN data. Except for the event log, there is no other tracking conducted on the computer." VerticalAlignment="Top" Grid.ColumnSpan="4" IsHitTestVisible="False" Grid.RowSpan="3" Width="380" Height="90"/>
+        <Button x:Name="OKButton" Grid.Column="1" Content="OK" HorizontalAlignment="Center" Grid.Row="3" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="124" Click="Button_Click" Margin="0,1,0,0" IsDefault="True"/>
+        <TextBlock HorizontalAlignment="Left" Margin="20" TextWrapping="Wrap" Text="ClipboardMonitor tracks your clipboard and checks only PAN. Except for the incident records in the Windows event log, no tracking is conducted on the computer." VerticalAlignment="Top" Grid.ColumnSpan="4" IsHitTestVisible="False" Grid.RowSpan="3" Width="360" Height="90"/>
     </Grid>
 </Window>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Security.Principal;
 
 namespace ClipboardMonitor
 {
@@ -8,6 +9,7 @@ namespace ClipboardMonitor
         private const string SOURCE = "ClipboardMonitor";
         private const string LOG = "ClipboardMonitor";
 
+        private readonly WindowsIdentity _windowsIdentity;
         private readonly EventLog? _log;
         private static readonly Lazy<Logger> LazyInstance = new(() => new Logger());
 
@@ -22,6 +24,8 @@ namespace ClipboardMonitor
                 Source = SOURCE,
                 Log = LOG
             };
+
+            _windowsIdentity = WindowsIdentity.GetCurrent();
         }
 
         public void Install()
@@ -75,15 +79,20 @@ namespace ClipboardMonitor
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         public void LogInfo(string message, int eventId) =>
-            _log.WriteEntry(message, EventLogEntryType.Information, eventId);
+            _log.WriteEntry(EnrichLog(message), EventLogEntryType.Information, eventId);
 
         public void LogWarning(string message, int eventId) =>
-            _log.WriteEntry(message, EventLogEntryType.Warning, eventId);
+            _log.WriteEntry(EnrichLog(message), EventLogEntryType.Warning, eventId);
 
         public void LogError(string message, int eventId) =>
-            _log.WriteEntry(message, EventLogEntryType.Error, eventId);
+            _log.WriteEntry(EnrichLog(message), EventLogEntryType.Error, eventId);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
+
+        private string EnrichLog(string message)
+        {
+            return $"Local Time: {DateTime.Now}\nUTC Time:{DateTime.UtcNow}\nUser:{_windowsIdentity.Name}\n{message}";
+        }
         private void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -92,6 +101,7 @@ namespace ClipboardMonitor
                 {
                     _log?.Close();
                     _log?.Dispose();
+                    _windowsIdentity.Dispose();
                 }
 
                 disposedValue = true;

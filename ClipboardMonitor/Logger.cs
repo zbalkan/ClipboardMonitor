@@ -40,7 +40,30 @@ namespace ClipboardMonitor
             }
         }
 
-        public bool Check() => EventLog.SourceExists(SOURCE);
+        public void Uninstall()
+        {
+            if (Check())
+            {
+                LogInfo("Uninstalling event log source.", 1);
+                EventLog.DeleteEventSource(SOURCE, LOG);
+                Debug.WriteLine("Removed Event Source");
+            }
+        }
+
+        public bool Check()
+        {
+#pragma warning disable CA1031 // Do not catch general exception types
+            try
+            {
+                var result = EventLog.SourceExists(SOURCE);
+                return result;
+            }
+            catch
+            {
+                return false;
+            }
+#pragma warning restore CA1031 // Do not catch general exception types
+        }
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
         public void LogInfo(string message, int eventId) =>

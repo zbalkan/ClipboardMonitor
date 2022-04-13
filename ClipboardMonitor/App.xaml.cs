@@ -27,7 +27,7 @@ namespace ClipboardMonitor
 
             if (args != null && args.Length == 2)
             {
-                if (args[1].Equals("-i", StringComparison.Ordinal))
+                if (args[1].Equals("-i", StringComparison.Ordinal) || args[1].Equals("/i", StringComparison.Ordinal) || args[1].Equals("--install", StringComparison.Ordinal))
                 {
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
@@ -42,15 +42,31 @@ namespace ClipboardMonitor
                         const string message = "You need to run as administrator first to install the application.";
                         _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
                     }
-#pragma warning restore CA1031 // Do not catch general exception types
                     finally
                     {
                         Environment.Exit(0);
                     }
                 }
-                else if (args[1].Equals("-?", StringComparison.Ordinal) || args[1].Equals("-h", StringComparison.Ordinal))
+                else if  (args[1].Equals("-u", StringComparison.Ordinal)|| args[1].Equals("/u", StringComparison.Ordinal) || args[1].Equals("--uninstall", StringComparison.Ordinal))
                 {
-                    const string message = "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i\tInstalls the application (Needs Admin rights).\n-?, -h\tDisplays this message box.";
+                    try
+                    {
+                        Logger.Instance.Install(); // Creates the event log source
+
+                        const string message = "The uninstallation completed.";
+                        MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                    }
+                    catch
+                    {
+                        const string message = "You need to run as administrator first to uninstall the application.";
+                        _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                    }
+#pragma warning restore CA1031 // Do not catch general exception types
+                }
+                else if (args[1].Equals("-?", StringComparison.Ordinal) || args[1].Equals("-h", StringComparison.Ordinal) || args[1].Equals("/h", StringComparison.Ordinal) || args[1].Equals("--help", StringComparison.Ordinal))
+                {
+                    const string message =
+                        "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
                     _ = MessageBox.Show(message, "Help", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
                 }
                 else

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardMonitor", "ClipboardMonitor\ClipboardMonitor.csproj", "{275BF120-F527-43AE-8B5A-5C833B9CC7B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClipboardMonitor", "ClipboardMonitor\ClipboardMonitor.csproj", "{275BF120-F527-43AE-8B5A-5C833B9CC7B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardMonitor.Tests", "ClipboardMonitor.Tests\ClipboardMonitor.Tests.csproj", "{E7263265-0E80-44BC-9532-31B91F986BB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{275BF120-F527-43AE-8B5A-5C833B9CC7B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{275BF120-F527-43AE-8B5A-5C833B9CC7B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{275BF120-F527-43AE-8B5A-5C833B9CC7B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7263265-0E80-44BC-9532-31B91F986BB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7263265-0E80-44BC-9532-31B91F986BB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7263265-0E80-44BC-9532-31B91F986BB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7263265-0E80-44BC-9532-31B91F986BB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -44,5 +44,16 @@ namespace ClipboardMonitor
         [DllImport("user32.dll")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr GetForegroundWindow();
+
+        //Reference http://pinvoke.net/default.aspx/user32/GetWindowThreadProcessId.html
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+#pragma warning disable CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
+        public static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
+#pragma warning restore CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
     }
 }

@@ -41,10 +41,6 @@ namespace ClipboardMonitor
                     var saveUtcNow = DateTime.UtcNow;
                     Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
 
-                    //Write to stdout active window
-                    var sb = CaptureClipboardText();
-                    Debug.WriteLine($"Clipboard Active Window: {sb}");
-
 
                     //Write to stdout clipboard contents
                     var content = Clipboard.GetText();
@@ -54,13 +50,14 @@ namespace ClipboardMonitor
                     var matches = PAN.ParseLine(content);
                     if (matches != null && matches.Count != 0)
                     {
-                        // Clear the clipboard
+                        var processInfo = CaptureProcessInfo();
+
                         Clipboard.SetText(_warningText);
 
                         foreach (var suspectedPAN in matches)
                         {
                             // Write to event log
-                            Logger.Instance.LogWarning($"Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application: {sb}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}", 20);
+                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ProcessPath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}", 20);
                         }
 
                         // Display a notification
@@ -69,15 +66,6 @@ namespace ClipboardMonitor
                 }
                 //Called for any unhandled messages
                 base.WndProc(ref m);
-            }
-
-            private static string CaptureClipboardText()
-            {
-                var active_window = NativeMethods.GetForegroundWindow();
-                var length = NativeMethods.GetWindowTextLength(active_window);
-                var sb = new StringBuilder(length + 1);
-                _ = NativeMethods.GetWindowText(active_window, sb, sb.Capacity);
-                return sb.ToString();
             }
         }
 
@@ -89,6 +77,39 @@ namespace ClipboardMonitor
             stringElements[1].AppendChild(toastXml.CreateTextNode(message));
             var toast = new ToastNotification(toastXml);
             ToastNotificationManager.CreateToastNotifier("NETS EE - ClipboardMonitor").Show(toast);
+        }
+
+        private static ProcessInformation CaptureProcessInfo()
+        {
+            try
+            {
+
+                var activeWindow = NativeMethods.GetForegroundWindow();
+
+                var length = NativeMethods.GetWindowTextLength(activeWindow);
+                var title = new StringBuilder(length + 1);
+                _ = NativeMethods.GetWindowText(activeWindow, title, title.Capacity);
+
+                _ = NativeMethods.GetWindowThreadProcessId(activeWindow, out var processId);
+                var process = Process.GetProcessById(processId);
+                if (process != null)
+                {
+                    var name = process.ProcessName;
+                    var path = process.MainModule != null ? process.MainModule.FileName : string.Empty;
+                    var pi = new ProcessInformation
+                    {
+                        ProcessName = name,
+                        ProcessPath = path ?? string.Empty,
+                        WindowTitle = title.ToString()
+                    };
+                    return pi;
+                }
+                return default;
+            }
+            catch
+            {
+                return default;
+            }
         }
 
         public void Dispose()

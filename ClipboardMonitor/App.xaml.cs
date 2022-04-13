@@ -32,10 +32,18 @@ namespace ClipboardMonitor
 #pragma warning disable CA1031 // Do not catch general exception types
                     try
                     {
-                        Logger.Instance.Install(); // Creates the event log source
+                        if (Logger.Instance.Check())
+                        {
+                            const string message = "ClipboardMonitor is already installed.";
+                            MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                        }
+                        else
+                        {
+                            Logger.Instance.Install(); // Creates the event log source
 
-                        const string message = "The installation completed.";
-                        MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                            const string message = "Installation completed.";
+                            MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                        }
                     }
                     catch
                     {
@@ -47,13 +55,13 @@ namespace ClipboardMonitor
                         Environment.Exit(0);
                     }
                 }
-                else if  (args[1].Equals("-u", StringComparison.Ordinal)|| args[1].Equals("/u", StringComparison.Ordinal) || args[1].Equals("--uninstall", StringComparison.Ordinal))
+                else if (args[1].Equals("-u", StringComparison.Ordinal) || args[1].Equals("/u", StringComparison.Ordinal) || args[1].Equals("--uninstall", StringComparison.Ordinal))
                 {
                     try
                     {
                         Logger.Instance.Uninstall(); // Creates the event log source
 
-                        const string message = "The uninstallation completed.";
+                        const string message = "Uninstallation completed.";
                         MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
                     }
                     catch

@@ -44,8 +44,16 @@ namespace ClipboardMonitor
         {
             if (Check())
             {
-                LogInfo("Uninstalling event log source.", 1);
-                EventLog.DeleteEventSource(SOURCE, LOG);
+                Debug.WriteLine("Uninstalling event log source.", 1);
+
+                if (_log != null)
+                {
+                    _log.Clear(); // Might be unnecessary
+                    _log.Close();
+                    _log.Dispose();
+                }
+
+                EventLog.Delete(LOG);
                 Debug.WriteLine("Removed Event Source");
             }
         }

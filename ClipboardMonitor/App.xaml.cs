@@ -51,7 +51,7 @@ namespace ClipboardMonitor
                 {
                     try
                     {
-                        Logger.Instance.Install(); // Creates the event log source
+                        Logger.Instance.Uninstall(); // Creates the event log source
 
                         const string message = "The uninstallation completed.";
                         MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
@@ -60,6 +60,10 @@ namespace ClipboardMonitor
                     {
                         const string message = "You need to run as administrator first to uninstall the application.";
                         _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                    }
+                    finally
+                    {
+                        Environment.Exit(0);
                     }
 #pragma warning restore CA1031 // Do not catch general exception types
                 }

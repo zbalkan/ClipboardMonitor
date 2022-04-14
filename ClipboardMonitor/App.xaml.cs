@@ -19,6 +19,44 @@ namespace ClipboardMonitor
 
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
+        {         
+            HandleArguments();
+            
+            if (!Logger.Instance.Check())
+            {
+                const string message = "You need to run as administrator with argument '-i' to install the application.";
+                _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                Environment.Exit(0);
+            }
+
+            if (ProcessHelper.IsDuplicate())
+            {
+                Logger.Instance.LogInfo($"Killing redundant ClipboardMonitor instance.", 15);
+                Environment.Exit(0);
+            }
+
+            ProcessHelper.Cover();
+
+            base.OnStartup(e);
+
+            SetupExceptionHandling();
+
+            
+            Logger.Instance.LogInfo($"Started a new ClipboardMonitor instance.", 10);
+
+            // Configure PAN search configuration. You can add new card types by following the same steps
+            PAN.Instance.AddPaymentBrand(new Mastercard())
+                .AddPaymentBrand(new Visa())
+                .AddPaymentBrand(new Amex());
+
+            notification = new ClipboardNotification("REDACTED");
+
+            // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
+            // Finally, show the icon
+            notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
+        }
+
+        private static void HandleArguments()
         {
             var args = Environment.GetCommandLineArgs();
 
@@ -88,35 +126,6 @@ namespace ClipboardMonitor
                     throw new ArgumentException($"Invalid arguments.{args[2]}");
                 }
             }
-            if (!Logger.Instance.Check())
-            {
-                const string message = "You need to run as administrator with argument '-i' to install the application.";
-                _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                Environment.Exit(0);
-            }
-
-            if (ProcessHelper.IsDuplicate())
-            {
-                Logger.Instance.LogInfo($"Killing redundant ClipboardMonitor instance.", 15);
-                Environment.Exit(0);
-            }
-
-            ProcessHelper.Cover();
-
-            base.OnStartup(e);
-
-            SetupExceptionHandling();
-
-            //create the notify icon (it's a resource declared in NotifyIconResources.xaml
-            notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
-            Logger.Instance.LogInfo($"Started a new ClipboardMonitor instance.", 10);
-
-            // Configure PAN search configuration. You can add new card types by following the same steps
-            PAN.Instance.AddPaymentBrand(new Mastercard())
-                .AddPaymentBrand(new Visa())
-                .AddPaymentBrand(new Amex());
-
-            notification = new ClipboardNotification("REDACTED");
         }
 
         protected override void OnExit(ExitEventArgs e)

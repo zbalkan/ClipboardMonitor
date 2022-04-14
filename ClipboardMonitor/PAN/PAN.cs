@@ -1,36 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using ClipboardMonitor.PaymentBrands;
 
 namespace ClipboardMonitor
 {
-    public static class PAN
+    public sealed class PAN
     {
-        private static readonly Regex Mastercard = new(@"(?:\D|^)(5[1-5][0-9]{2}(?:\ |\-|)[0-9]{4}(?:\ |\-|)[0-9]{4}(?:\ |\-|)[0-9]{4})(?:\D|$)", RegexOptions.Compiled);
-        private static readonly Regex Visa = new(@"(?:\D|^)(4[0-9]{3}(?:\ |\-|)[0-9]{4}(?:\ |\-|)[0-9]{4}(?:\ |\-|)[0-9]{4})(?:\D|$)", RegexOptions.Compiled);
-        private static readonly Regex Amex = new(@"(?:\D|^)((?:34|37)[0-9]{2}(?:\ |\-|)[0-9]{6}(?:\ |\-|)[0-9]{5})(?:\D|$)", RegexOptions.Compiled);
+        private readonly List<IPaymentBrand> paymentBrands;
 
-        public static IReadOnlyList<PANData> Parse(string text)
+        private const int minimumPANLength = 15;
+
+        private static readonly Lazy<PAN> LazyInstance = new(() => new PAN());
+
+        public static PAN Instance = LazyInstance.Value;
+
+        private PAN()
         {
-            var matches = ParseLine(text);
+            paymentBrands = new List<IPaymentBrand>();
+        }
 
-            if (matches != null && matches.Count != 0)
+        public PAN AddPaymentBrand(IPaymentBrand paymentBrand)
+        {
+            paymentBrands.Add(paymentBrand);
+            return this;
+        }
+
+        public IReadOnlyList<PANData> Parse(string text)
+        {
+
+            if (paymentBrands == null || paymentBrands.Count == 0)
             {
-                var list = new List<PANData>(matches.Count);
+                throw new ArgumentException($"No payment brand is defined. Define at least one payment brand.", nameof(paymentBrands));
+            }
 
-                foreach (var suspectedPAN in matches)
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentException($"'{nameof(text)}' cannot be null or empty.", nameof(text));
+            }
+
+            var maxPossibleNumberOfPANs = text.Length / minimumPANLength;
+            var list = new List<PANData>(maxPossibleNumberOfPANs);
+
+            foreach (var brand in paymentBrands)
+            {
+                var result = brand.Parse(text);
+                if (result != null)
                 {
-                    if (PAN.Validate(suspectedPAN, out var cardType))
+                    foreach (var p in result)
                     {
-#pragma warning disable CS8601 // Possible null reference assignment.
-                        list.Add(new PANData() { MaskedPAN = Mask(suspectedPAN), PaymentBrand = Enum.GetName(cardType) });
-#pragma warning restore CS8601 // Possible null reference assignment.
+                        list.Add(new PANData() { MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brand.ToString() });
                     }
                 }
-                return list.AsReadOnly();
             }
-            return new List<PANData>().AsReadOnly();
+
+            return list.AsReadOnly();
         }
 
         /// <summary>
@@ -44,11 +68,11 @@ namespace ClipboardMonitor
         /// <see href="https://www.pcisecuritystandards.org/"/>
         /// <param name="cardNumber">PAN</param>
         /// <returns></returns>
-        public static string Mask(string cardNumber)
+        public string Mask(string cardNumber)
         {
             if (string.IsNullOrEmpty(cardNumber))
             {
-                throw new System.ArgumentException($"'{nameof(cardNumber)}' cannot be null or empty.", nameof(cardNumber));
+                throw new ArgumentException($"'{nameof(cardNumber)}' cannot be null or empty.", nameof(cardNumber));
             }
 
             var first = cardNumber.Substring(0, 6);
@@ -72,46 +96,6 @@ namespace ClipboardMonitor
             return string.Concat(first, new string(maskedArray), last);
         }
 
-        private static string GetNumbers(string input) => new(input.Where(c => char.IsDigit(c)).ToArray());
-
-        private static bool Validate(string cardNumber, out CardType cardType)
-        {
-            cardType = GetCardType(cardNumber);
-            return cardType != CardType.Invalid && Luhn.Validate(cardNumber);
-        }
-
-        private static CardType GetCardType(string cardNumber)
-        {
-            if (Mastercard.IsMatch(cardNumber))
-            {
-                return CardType.Mastercard;
-            }
-
-            if (Visa.IsMatch(cardNumber))
-            {
-                return CardType.Visa;
-            }
-
-            if (Amex.IsMatch(cardNumber))
-            {
-                return CardType.Amex;
-            }
-            return CardType.Invalid;
-        }
-
-        private static System.Collections.ObjectModel.ReadOnlyCollection<string> ParseLine(string line)
-        {
-            var mastercard = PAN.Mastercard.Matches(line);
-            var visa = PAN.Visa.Matches(line);
-            var amex = PAN.Amex.Matches(line);
-
-            var list = new List<string>(capacity: mastercard.Count + visa.Count + amex.Count);
-
-            list.AddRange(mastercard.Select(item => GetNumbers(item.Value)));
-            list.AddRange(visa.Select(item => GetNumbers(item.Value)));
-            list.AddRange(amex.Select(item => GetNumbers(item.Value)));
-
-            return list.AsReadOnly();
-        }
+        private string GetOnlyNumbers(string input) => new(input.Where(c => char.IsDigit(c)).ToArray());
     }
 }

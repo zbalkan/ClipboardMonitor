@@ -14,7 +14,6 @@ namespace ClipboardMonitor
     {
         private readonly NotificationForm notificationForm;
         private bool disposedValue;
-
         public ClipboardNotification(string warningText)
         {
             notificationForm = new NotificationForm(warningText);
@@ -23,6 +22,7 @@ namespace ClipboardMonitor
         private sealed class NotificationForm : Form
         {
             private readonly string _warningText;
+
             public NotificationForm(string warningText)
             {
                 _warningText = warningText;
@@ -48,7 +48,7 @@ namespace ClipboardMonitor
                     //Debug.WriteLine($"Clipboard Content: {content}");
 
                     // Run the PAN search
-                    var searchResult = PAN.Parse(content);
+                    var searchResult = PAN.Instance.Parse(content);
                     if (IncludesPANData(searchResult))
                     {
                         var processInfo = ProcessHelper.CaptureProcessInfo();

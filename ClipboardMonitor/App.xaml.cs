@@ -1,4 +1,5 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+﻿using ClipboardMonitor.PaymentBrands;
+using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace ClipboardMonitor
 
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
-        {          
+        {
             var args = Environment.GetCommandLineArgs();
 
             if (args != null && args.Length > 2)
@@ -103,12 +104,18 @@ namespace ClipboardMonitor
             ProcessHelper.Cover();
 
             base.OnStartup(e);
-            
+
             SetupExceptionHandling();
 
             //create the notify icon (it's a resource declared in NotifyIconResources.xaml
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
             Logger.Instance.LogInfo($"Started a new ClipboardMonitor instance.", 10);
+
+            // Configure PAN search configuration. You can add new card types by following the same steps
+            PAN.Instance.AddPaymentBrand(new Mastercard())
+                .AddPaymentBrand(new Visa())
+                .AddPaymentBrand(new Amex());
+
             notification = new ClipboardNotification("REDACTED");
         }
 

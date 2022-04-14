@@ -1,4 +1,4 @@
-﻿namespace ClipboardMonitor
+﻿namespace ClipboardMonitor.PAN
 {
     public enum CardType
     {

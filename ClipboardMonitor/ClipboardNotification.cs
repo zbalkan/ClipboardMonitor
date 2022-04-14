@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Windows.Forms;
-using System.Text;
-using System.Diagnostics;
-using Windows.UI.Notifications;
-using System.IO;
-using System.Reflection;
-using System.Drawing;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Windows.Forms;
+using ClipboardMonitor.PAN;
+using Windows.UI.Notifications;
 
 namespace ClipboardMonitor
 {
@@ -48,7 +45,7 @@ namespace ClipboardMonitor
                     //Debug.WriteLine($"Clipboard Content: {content}");
 
                     // Run the PAN search
-                    var searchResult = PAN.Instance.Parse(content);
+                    var searchResult = PANData.Instance.Parse(content);
                     if (IncludesPANData(searchResult))
                     {
                         var processInfo = ProcessHelper.CaptureProcessInfo();
@@ -68,7 +65,7 @@ namespace ClipboardMonitor
                 base.WndProc(ref m);
             }
 
-            private static bool IncludesPANData(IReadOnlyList<PANData> searchResult) => searchResult != null && searchResult.Count != 0;
+            private static bool IncludesPANData(IReadOnlyList<SuspectedPANData> searchResult) => searchResult != null && searchResult.Count != 0;
         }
 
         private static void SendToastNotification(string title, string message)

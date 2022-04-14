@@ -1,4 +1,5 @@
-﻿using ClipboardMonitor.PaymentBrands;
+﻿using ClipboardMonitor.PAN;
+using ClipboardMonitor.PaymentBrands;
 using Hardcodet.Wpf.TaskbarNotification;
 using System;
 using System.Diagnostics;
@@ -19,9 +20,9 @@ namespace ClipboardMonitor
 
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
-        {         
+        {
             HandleArguments();
-            
+
             if (!Logger.Instance.Check())
             {
                 const string message = "You need to run as administrator with argument '-i' to install the application.";
@@ -41,11 +42,11 @@ namespace ClipboardMonitor
 
             SetupExceptionHandling();
 
-            
+
             Logger.Instance.LogInfo($"Started a new ClipboardMonitor instance.", 10);
 
             // Configure PAN search configuration. You can add new card types by following the same steps
-            PAN.Instance.AddPaymentBrand(new Mastercard())
+            PANData.Instance.AddPaymentBrand(new Mastercard())
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex());
 

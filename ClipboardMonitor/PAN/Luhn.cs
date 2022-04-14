@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Linq;
 
-namespace ClipboardMonitor
+namespace ClipboardMonitor.PAN
 {
     public static class Luhn
     {
@@ -31,13 +31,13 @@ namespace ClipboardMonitor
 
                     if (n > 9)
                     {
-                        n = (n % 10) + 1;
+                        n = n % 10 + 1;
                     }
                 }
                 sum += n;
                 alternate = !alternate;
             }
-            return (sum % 10 == 0);
+            return sum % 10 == 0;
         }
     }
 }

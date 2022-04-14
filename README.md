@@ -6,12 +6,12 @@ ClipboardMonitor is an application running in the background that tracks clipboa
 ## Installation
 The logs are written into event log. In order to add or remove the log source, you need administration rights during installation and uninstallation.
 
-1. In an elevated terminal/cmd/powershell session, run ClipboardMonitor -i (or /i or --install).
-2. Run the ClipboardMonitor.
-3. Win.
+1. In an elevated terminal/cmd/powershell session, run `ClipboardMonitor -i` (or `/i` or `--install`).
+2. Run the `ClipboardMonitor`.
+3. Success.
 
 ### Uninstallation
-In an elevated terminal/cmd/powershell session, run ClipboardMonitor -u (or /u or --uninstall).
+In an elevated terminal/cmd/powershell session, run `ClipboardMonitor -u` (or `/u` or `--uninstall`).
 
 ## Usage
 ```

@@ -6,6 +6,7 @@ using Windows.UI.Notifications;
 using System.IO;
 using System.Reflection;
 using System.Drawing;
+using System.Collections.Generic;
 
 namespace ClipboardMonitor
 {
@@ -47,19 +48,16 @@ namespace ClipboardMonitor
                     //Debug.WriteLine($"Clipboard Content: {content}");
 
                     // Run the PAN search
-                    var matches = PAN.ParseLine(content);
-                    if (matches != null && matches.Count != 0)
+                    var searchResult = PAN.Parse(content);
+                    if (IncludesPANData(searchResult))
                     {
                         var processInfo = ProcessHelper.CaptureProcessInfo();
 
                         Clipboard.SetText(_warningText);
 
-                        foreach (var suspectedPAN in matches)
+                        foreach (var suspectedPAN in searchResult)
                         {
-                            if (PAN.Validate(suspectedPAN, out var cardType))
-                            {
-                                Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nCaptured data: {PAN.Format(suspectedPAN, PANDisplayMode.Masked)}\nProbably card type: {Enum.GetName(cardType)}", 20);
-                            }
+                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nSuspected PAN data: {suspectedPAN.MaskedPAN}\nProbable payment brand: {suspectedPAN.PaymentBrand}", 20);
                         }
 
                         // Display a notification
@@ -69,6 +67,8 @@ namespace ClipboardMonitor
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
+
+            private static bool IncludesPANData(IReadOnlyList<PANData> searchResult) => searchResult != null && searchResult.Count != 0;
         }
 
         private static void SendToastNotification(string title, string message)

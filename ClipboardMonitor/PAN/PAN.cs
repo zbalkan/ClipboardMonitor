@@ -50,19 +50,14 @@ namespace ClipboardMonitor
             return list.AsReadOnly();
         }
 
-        public static string Format(string PANNumber, PANDisplayMode displayMode)
+        public static string Format(string PANNumber)
         {
             if (string.IsNullOrEmpty(PANNumber))
             {
                 throw new System.ArgumentException($"'{nameof(PANNumber)}' cannot be null or empty.", nameof(PANNumber));
             }
 
-            return displayMode switch
-            {
-                PANDisplayMode.Unmasked => PANNumber,
-                PANDisplayMode.Truncated => Truncate(cardNumber: PANNumber),
-                _ => Mask(PANNumber),
-            };
+            return Mask(PANNumber);
         }
 
         /// <summary>
@@ -97,14 +92,6 @@ namespace ClipboardMonitor
             }
 
             return string.Concat(first, new string(maskedArray), last);
-        }
-
-        private static string Truncate(string cardNumber)
-        {
-            var first = cardNumber.Substring(0, 6);
-            var last = cardNumber.Substring(cardNumber.Length - 5, 4);
-
-            return string.Concat(first, last);
         }
 
         private static string GetNumbers(string input) => new(input.Where(c => char.IsDigit(c)).ToArray());

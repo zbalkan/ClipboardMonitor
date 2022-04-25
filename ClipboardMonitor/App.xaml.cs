@@ -1,12 +1,11 @@
-﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
-using Hardcodet.Wpf.TaskbarNotification;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
+using ClipboardMonitor.PAN;
+using ClipboardMonitor.PaymentBrands;
+using Hardcodet.Wpf.TaskbarNotification;
 
-[assembly: CLSCompliant(true)]
 namespace ClipboardMonitor
 {
     /// <summary>
@@ -61,14 +60,13 @@ namespace ClipboardMonitor
         {
             var args = Environment.GetCommandLineArgs();
 
-            if (args != null && args.Length > 2)
+            switch (args)
             {
-                throw new ArgumentException($"Invalid arguments.{args[2]}");
-            }
-
-            if (args != null && args.Length == 2)
-            {
-                if (args[1].Equals("-i", StringComparison.Ordinal) || args[1].Equals("/i", StringComparison.Ordinal) || args[1].Equals("--install", StringComparison.Ordinal))
+                case {Length: > 2}:
+                {
+                    throw new ArgumentException($"Invalid arguments.{args[2]}");
+                }
+                case {Length: 2} when args[1].Equals("-i", StringComparison.Ordinal) || args[1].Equals("/i", StringComparison.Ordinal) || args[1].Equals("--install", StringComparison.Ordinal):
                 {
                     try
                     {
@@ -95,8 +93,10 @@ namespace ClipboardMonitor
                     {
                         Environment.Exit(0);
                     }
+
+                    break;
                 }
-                else if (args[1].Equals("-u", StringComparison.Ordinal) || args[1].Equals("/u", StringComparison.Ordinal) || args[1].Equals("--uninstall", StringComparison.Ordinal))
+                case {Length: 2} when args[1].Equals("-u", StringComparison.Ordinal) || args[1].Equals("/u", StringComparison.Ordinal) || args[1].Equals("--uninstall", StringComparison.Ordinal):
                 {
                     try
                     {
@@ -115,14 +115,17 @@ namespace ClipboardMonitor
                     {
                         Environment.Exit(0);
                     }
+
+                    break;
                 }
-                else if (args[1].Equals("-?", StringComparison.Ordinal) || args[1].Equals("-h", StringComparison.Ordinal) || args[1].Equals("/h", StringComparison.Ordinal) || args[1].Equals("--help", StringComparison.Ordinal))
+                case {Length: 2} when args[1].Equals("-?", StringComparison.Ordinal) || args[1].Equals("-h", StringComparison.Ordinal) || args[1].Equals("/h", StringComparison.Ordinal) || args[1].Equals("--help", StringComparison.Ordinal):
                 {
                     const string message =
                         "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
                     _ = MessageBox.Show(message, "Help", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                    break;
                 }
-                else
+                case {Length: 2}:
                 {
                     throw new ArgumentException($"Invalid arguments.{args[2]}");
                 }
@@ -171,18 +174,21 @@ namespace ClipboardMonitor
             }
         }
 
-        protected virtual void Dispose(bool disposing)
+        virtual protected void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    _notification?.Dispose();
-                    _notifyIcon?.Dispose(); //the icon would clean up automatically, but this is cleaner
-                }
-
-                _disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                ProcessHelper.Uncover();
+                _notification?.Dispose();
+                _notifyIcon?.Dispose(); //the icon would clean up automatically, but this is cleaner
+            }
+
+            _disposedValue = true;
         }
 
         public void Dispose()

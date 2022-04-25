@@ -13,14 +13,8 @@ namespace ClipboardMonitor.PAN
         public bool Equals(SuspectedPANData other) => MaskedPAN == other.MaskedPAN && PaymentBrand == other.PaymentBrand;
         public override int GetHashCode() => HashCode.Combine(MaskedPAN, PaymentBrand);
 
-        public static bool operator ==(SuspectedPANData left, SuspectedPANData right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(SuspectedPANData left, SuspectedPANData right) => left.Equals(right);
 
-        public static bool operator !=(SuspectedPANData left, SuspectedPANData right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(SuspectedPANData left, SuspectedPANData right) => !(left == right);
     }
 }

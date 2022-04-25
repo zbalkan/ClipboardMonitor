@@ -22,9 +22,7 @@ namespace ClipboardMonitor
         public ICommand AboutCommand => new DelegateCommand
         {
             CommandAction = () => new AboutWindow().Show(),
-            CanExecuteFunc = () => !GetChildWindows()
-                    .Any(
-                aboutWindow => aboutWindow.GetType() == typeof(AboutWindow))
+            CanExecuteFunc = () => GetChildWindows().All(aboutWindow => aboutWindow.GetType() != typeof(AboutWindow))
         };
 #pragma warning restore CA1822 // Mark members as static
 
@@ -36,6 +34,6 @@ namespace ClipboardMonitor
         /// <para><see href="https://stackoverflow.com/questions/46416123/how-to-properly-ignore-windows-created-by-visual-studio-debugging-tool-for-xaml"/></para>
         /// </summary>
         /// <returns> Returns only the child windows of this application. </returns>
-        private static List<Window> GetChildWindows() => Application.Current.Windows.Cast<Window>().Where(w => w.ActualWidth != 0).ToList();
+        private static IEnumerable<Window> GetChildWindows() => Application.Current.Windows.Cast<Window>().Where(w => w.ActualWidth != 0).ToList();
     }
 }

@@ -27,15 +27,13 @@ namespace ClipboardMonitor
         {
             try
             {
-
                 var activeWindow = NativeMethods.GetForegroundWindow();
-
                 var length = NativeMethods.GetWindowTextLength(activeWindow);
                 var title = new StringBuilder(length + 1);
                 _ = NativeMethods.GetWindowText(activeWindow, title, title.Capacity);
 
                 _ = NativeMethods.GetWindowThreadProcessId(activeWindow, out var processId);
-                var process = Process.GetProcessById(processId);
+                var process = FindProcess(processId);
                 return process == null
                     ? default
                     : new ProcessInformation
@@ -50,6 +48,21 @@ namespace ClipboardMonitor
                 Debug.WriteLine(ex.Message);
                 return default;
             }
+        }
+
+        private static Process? FindProcess(int processId)
+        {
+            Process process;
+
+            try
+            {
+                process = Process.GetProcessById(processId);
+            }
+            catch
+            {
+                return null;
+            }
+            return process;
         }
 
         /// <summary>

@@ -50,12 +50,6 @@ namespace ClipboardMonitor
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-#pragma warning disable CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
-        public static extern int GetModuleFileName(IntPtr hModule, StringBuilder lpFilename, int nSize);
-#pragma warning restore CA1838 // Avoid 'StringBuilder' parameters for P/Invokes
-
         [DllImport("kernel32.dll")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern IntPtr GetCurrentProcess();

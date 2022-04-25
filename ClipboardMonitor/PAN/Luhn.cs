@@ -8,18 +8,18 @@ namespace ClipboardMonitor.PAN
         /// <summary>
         /// Validate number against Luhn Algorithm
         /// </summary>
-        /// <param name="cardnumber">Card number</param>
+        /// <param name="cardNumber">Card number</param>
         /// <returns>bool</returns>
-        public static bool Validate(string cardnumber)
+        public static bool Validate(string cardNumber)
         {
-            if (string.IsNullOrEmpty(cardnumber))
+            if (string.IsNullOrEmpty(cardNumber))
             {
                 return false;
             }
 
             var sum = 0;
             var alternate = false;
-            var nx = cardnumber.Replace("-", "", System.StringComparison.OrdinalIgnoreCase).Replace(" ", "", System.StringComparison.OrdinalIgnoreCase).ToArray();
+            var nx = cardNumber.Replace("-", "", System.StringComparison.OrdinalIgnoreCase).Replace(" ", "", System.StringComparison.OrdinalIgnoreCase).ToArray();
 
             for (var i = nx.Length - 1; i >= 0; i--)
             {

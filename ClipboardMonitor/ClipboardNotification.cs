@@ -1,8 +1,8 @@
-﻿using System;
+﻿using ClipboardMonitor.PAN;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
-using ClipboardMonitor.PAN;
 using Windows.UI.Notifications;
 
 namespace ClipboardMonitor
@@ -87,14 +87,16 @@ namespace ClipboardMonitor
 
         private void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (_disposedValue)
             {
-                if (disposing)
-                {
-                    _notificationForm.Dispose();
-                }
-                _disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                _notificationForm.Dispose();
+            }
+            _disposedValue = true;
         }
     }
 }

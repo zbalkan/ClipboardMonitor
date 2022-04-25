@@ -159,11 +159,12 @@ namespace ClipboardMonitor
 
         private static bool IsArgumentCountInvalid(string[] args) => args is { Length: > 2 };
 
-        protected override void OnExit(ExitEventArgs e)
-        {
-            Logger.Instance.LogInfo("ClipboardMonitor us shutting down.", 11);
 
+        private void OnExit(object sender, ExitEventArgs e)
+        {
+            Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
             base.OnExit(e);
+
         }
 
         private void SetupExceptionHandling()

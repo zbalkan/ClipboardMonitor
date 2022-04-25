@@ -14,9 +14,9 @@ namespace ClipboardMonitor
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private TaskbarIcon? notifyIcon;
-        private ClipboardNotification? notification;
-        private bool disposedValue;
+        private TaskbarIcon? _notifyIcon;
+        private ClipboardNotification? _notification;
+        private bool _disposedValue;
 
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
@@ -50,11 +50,11 @@ namespace ClipboardMonitor
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex());
 
-            notification = new ClipboardNotification("REDACTED");
+            _notification = new ClipboardNotification("REDACTED");
 
             // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
             // Finally, show the icon
-            notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
+            _notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
         }
 
         private static void HandleArguments()
@@ -173,15 +173,15 @@ namespace ClipboardMonitor
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    notification?.Dispose();
-                    notifyIcon?.Dispose(); //the icon would clean up automatically, but this is cleaner
+                    _notification?.Dispose();
+                    _notifyIcon?.Dispose(); //the icon would clean up automatically, but this is cleaner
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

@@ -9,11 +9,11 @@ namespace ClipboardMonitor
 {
     public sealed class ClipboardNotification : IDisposable
     {
-        private readonly NotificationForm notificationForm;
-        private bool disposedValue;
+        private readonly NotificationForm _notificationForm;
+        private bool _disposedValue;
         public ClipboardNotification(string warningText)
         {
-            notificationForm = new NotificationForm(warningText);
+            _notificationForm = new NotificationForm(warningText);
         }
 
         private sealed class NotificationForm : Form
@@ -52,9 +52,9 @@ namespace ClipboardMonitor
 
                         Clipboard.SetText(_warningText);
 
-                        foreach (var suspectedPAN in searchResult)
+                        foreach (var suspectedPan in searchResult)
                         {
-                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nSuspected PAN data: {suspectedPAN.MaskedPAN}\nProbable payment brand: {suspectedPAN.PaymentBrand}", 20);
+                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nSuspected PAN data: {suspectedPan.MaskedPAN}\nProbable payment brand: {suspectedPan.PaymentBrand}", 20);
                         }
 
                         // Display a notification
@@ -87,13 +87,13 @@ namespace ClipboardMonitor
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    notificationForm.Dispose();
+                    _notificationForm.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
     }

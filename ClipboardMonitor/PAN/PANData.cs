@@ -7,7 +7,7 @@ namespace ClipboardMonitor.PAN
 {
     public sealed class PANData
     {
-        private readonly List<IPaymentBrand> paymentBrands;
+        private readonly List<IPaymentBrand> _paymentBrands;
 
         private const int minimumPANLength = 15;
 
@@ -17,20 +17,20 @@ namespace ClipboardMonitor.PAN
 
         private PANData()
         {
-            paymentBrands = new List<IPaymentBrand>();
+            _paymentBrands = new List<IPaymentBrand>();
         }
 
         public PANData AddPaymentBrand(IPaymentBrand paymentBrand)
         {
-            paymentBrands.Add(paymentBrand);
+            _paymentBrands.Add(paymentBrand);
             return this;
         }
 
         public IReadOnlyList<SuspectedPANData> Parse(string text)
         {
-            if (paymentBrands == null || paymentBrands.Count == 0)
+            if (_paymentBrands == null || _paymentBrands.Count == 0)
             {
-                throw new ArgumentException($"No payment brand is defined. Define at least one payment brand.", nameof(paymentBrands));
+                throw new ArgumentException($"No payment brand is defined. Define at least one payment brand.", nameof(_paymentBrands));
             }
 
             if (string.IsNullOrEmpty(text))
@@ -41,7 +41,7 @@ namespace ClipboardMonitor.PAN
             var maxPossibleNumberOfPANs = text.Length / minimumPANLength;
             var list = new List<SuspectedPANData>(maxPossibleNumberOfPANs);
 
-            foreach (var brand in paymentBrands)
+            foreach (var brand in _paymentBrands)
             {
                 var result = brand.Parse(text);
                 if (result != null)

@@ -6,18 +6,18 @@ namespace ClipboardMonitor
     {
         public static string GetText()
         {
-            var ReturnValue = string.Empty;
+            var returnValue = string.Empty;
             var STAThread = new Thread(
                 delegate () {
                     // Use a fully qualified name for Clipboard otherwise it
                     // will end up calling itself.
-                    ReturnValue = System.Windows.Forms.Clipboard.GetText();
+                    returnValue = System.Windows.Forms.Clipboard.GetText();
                 });
             STAThread.SetApartmentState(ApartmentState.STA);
             STAThread.Start();
             STAThread.Join();
 
-            return ReturnValue;
+            return returnValue;
         }
 
 

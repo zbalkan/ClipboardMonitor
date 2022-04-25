@@ -6,23 +6,23 @@ namespace ClipboardMonitor
 {
     internal sealed class Logger : IDisposable
     {
-        private const string SOURCE = "ClipboardMonitor";
-        private const string LOG = "ClipboardMonitor";
+        private const string Source = "ClipboardMonitor";
+        private const string Log = "ClipboardMonitor";
 
         private readonly string _username;
         private readonly EventLog? _log;
         private static readonly Lazy<Logger> LazyInstance = new(() => new Logger());
 
         public static Logger Instance = LazyInstance.Value;
-        private bool disposedValue;
+        private bool _disposedValue;
 
         private Logger()
         {
             // Create an EventLog instance and assign its source.
             _log = new EventLog
             {
-                Source = SOURCE,
-                Log = LOG
+                Source = Source,
+                Log = Log
             };
 
             _username = WindowsIdentity.GetCurrent().Name;
@@ -37,7 +37,7 @@ namespace ClipboardMonitor
                 //There is a latency time to enable the source, it should be created
                 //prior to executing the application that uses the source.
                 //Execute this sample a second time to use the new source.
-                EventLog.CreateEventSource(SOURCE, LOG);
+                EventLog.CreateEventSource(Source, Log);
                 Debug.WriteLine("Created Event Source");
                 Debug.WriteLine("Exiting, execute the application a second time to use the source.");
                 // The source is created.  Exit the application to allow it to be registered.
@@ -57,7 +57,7 @@ namespace ClipboardMonitor
                     _log.Dispose();
                 }
 
-                EventLog.Delete(LOG);
+                EventLog.Delete(Log);
                 Debug.WriteLine("Removed Event Source");
             }
         }
@@ -66,7 +66,7 @@ namespace ClipboardMonitor
         {
             try
             {
-                var result = EventLog.SourceExists(SOURCE);
+                var result = EventLog.SourceExists(Source);
                 return result;
             }
             catch (System.Security.SecurityException ex)
@@ -91,7 +91,7 @@ namespace ClipboardMonitor
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
@@ -99,7 +99,7 @@ namespace ClipboardMonitor
                     _log?.Dispose();
                 }
 
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

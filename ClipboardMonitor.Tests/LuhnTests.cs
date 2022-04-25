@@ -1,5 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ClipboardMonitor.PAN;
+﻿using ClipboardMonitor.PAN;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
 {

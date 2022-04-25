@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Security;
 using System.Security.Principal;
 
 namespace ClipboardMonitor
@@ -82,7 +83,7 @@ namespace ClipboardMonitor
                 var result = EventLog.SourceExists(Source);
                 return result;
             }
-            catch (System.Security.SecurityException ex)
+            catch (SecurityException ex)
             {
                 Debug.WriteLine(ex.Message);
                 return false;

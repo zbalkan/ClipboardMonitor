@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
 
 namespace ClipboardMonitor.PAN
@@ -19,7 +20,7 @@ namespace ClipboardMonitor.PAN
 
             var sum = 0;
             var alternate = false;
-            var nx = cardNumber.Replace("-", "", System.StringComparison.OrdinalIgnoreCase).Replace(" ", "", System.StringComparison.OrdinalIgnoreCase).ToArray();
+            var nx = cardNumber.Replace("-", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "", StringComparison.OrdinalIgnoreCase).ToArray();
 
             for (var i = nx.Length - 1; i >= 0; i--)
             {

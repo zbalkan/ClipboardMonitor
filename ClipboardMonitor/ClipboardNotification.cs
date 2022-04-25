@@ -1,9 +1,9 @@
-﻿using ClipboardMonitor.PAN;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Windows.UI.Notifications;
+using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor
 {

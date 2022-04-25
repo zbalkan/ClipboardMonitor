@@ -13,7 +13,7 @@ namespace ClipboardMonitor.PAN
 
         private static readonly Lazy<PANData> LazyInstance = new(() => new PANData());
 
-        public static PANData Instance = LazyInstance.Value;
+        public static PANData Instance { get; } = LazyInstance.Value;
 
         private PANData()
         {
@@ -30,7 +30,7 @@ namespace ClipboardMonitor.PAN
         {
             if (_paymentBrands == null || _paymentBrands.Count == 0)
             {
-                throw new ArgumentException($"No payment brand is defined. Define at least one payment brand.", nameof(_paymentBrands));
+                throw new ArgumentException("No payment brand is defined. Define at least one payment brand.", nameof(_paymentBrands));
             }
 
             if (string.IsNullOrEmpty(text))
@@ -74,7 +74,7 @@ namespace ClipboardMonitor.PAN
             }
 
             var first = cardNumber[..6];
-            var middle = cardNumber.Substring(6, cardNumber.Length - 10);
+            var middle = cardNumber[6..^4];
             var last = cardNumber.Substring(cardNumber.Length - 5, 4);
 
             var maskedArray = new char[middle.Length];
@@ -94,6 +94,6 @@ namespace ClipboardMonitor.PAN
             return string.Concat(first, new string(maskedArray), last);
         }
 
-        private string GetOnlyNumbers(string input) => new(input.Where(c => char.IsDigit(c)).ToArray());
+        private string GetOnlyNumbers(string input) => new(input.Where(char.IsDigit).ToArray());
     }
 }

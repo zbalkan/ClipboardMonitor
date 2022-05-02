@@ -42,7 +42,12 @@ namespace ClipboardMonitor
 
                     //Write to stdout clipboard contents
                     var content = Clipboard.GetText();
-                    //Debug.WriteLine($"Clipboard Content: {content}");
+
+                    // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
+                    if (content == null)
+                    {
+                        return;
+                    }
 
                     // Run the PAN search
                     var searchResult = PANData.Instance.Parse(content);

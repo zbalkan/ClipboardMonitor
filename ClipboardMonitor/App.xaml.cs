@@ -57,7 +57,7 @@ namespace ClipboardMonitor
             // Finally, show the icon
             _notifyIcon = FindTaskbarIcon();
 
-            ProcessHelper.SetCriticalProcess();
+            //ProcessHelper.SetCriticalProcess();
         }
 
         private static void HandleArguments()
@@ -195,7 +195,7 @@ namespace ClipboardMonitor
             finally
             {
                 Logger.Instance.LogError($"{message}\n{exception}", 3);
-                ProcessHelper.UnsetCriticalProcess();
+                //ProcessHelper.UnsetCriticalProcess();
                 Environment.Exit(1); // We don't want this to freeze
             }
         }
@@ -219,14 +219,14 @@ namespace ClipboardMonitor
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
-            ProcessHelper.UnsetCriticalProcess();
+            //ProcessHelper.UnsetCriticalProcess();
             base.OnExit(e);
         }
 
         private void OnSessionEnding(object sender, SessionEndingCancelEventArgs e)
         {
             e.Cancel = true;
-            ProcessHelper.UnsetCriticalProcess();
+            //ProcessHelper.UnsetCriticalProcess();
             e.Cancel = false;
             base.OnSessionEnding(e);
 

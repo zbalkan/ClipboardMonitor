@@ -162,14 +162,6 @@ namespace ClipboardMonitor
 
         private static bool IsArgumentCountInvalid(string[] args) => args is { Length: > 2 };
 
-        private void OnExit(object sender, ExitEventArgs e)
-        {
-            Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
-            ProcessHelper.UnsetCriticalProcess();
-            base.OnExit(e);
-
-        }
-
         private void SetupExceptionHandling()
         {
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -222,6 +214,22 @@ namespace ClipboardMonitor
             }
 
             return icon;
+        }
+
+        private void OnExit(object sender, ExitEventArgs e)
+        {
+            Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
+            ProcessHelper.UnsetCriticalProcess();
+            base.OnExit(e);
+        }
+
+        private void OnSessionEnding(object sender, SessionEndingCancelEventArgs e)
+        {
+            e.Cancel = true;
+            ProcessHelper.UnsetCriticalProcess();
+            e.Cancel = false;
+            base.OnSessionEnding(e);
+
         }
 
         protected virtual void Dispose(bool disposing)

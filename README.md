@@ -21,5 +21,10 @@ USAGE: ClipboardMonitor [ARGUMENTS]
 -?, -h, /h, --help		Displays this message box.
 ```
 
+### WARNING
+ClipboardMonitor requires Administrator (`SeDebugPrivilege`) privileges as of latest release.
+
+In case of interruption, such as running `taskkill` command or killing the process using Task Manager, user will get a BSOD `CRITICAL_PROCESS_DIED`.
+
 ## Development
-ClipboardMonitor is built with .NET 6 and WPF. Therefore you need Visual Studio with .NET Desktop Development features for development.
+ClipboardMonitor is built with .NET 6 and WPF. Therefore, you need Visual Studio with .NET Desktop Development features for development.

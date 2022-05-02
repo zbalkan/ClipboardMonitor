@@ -52,7 +52,7 @@ namespace ClipboardMonitor
 
         public static void SetCriticalProcess()
         {
-            var isCritical = 1;  // we want this to be a Critical Process
+            var isCritical = 1;  // we want this to be a Critical Process, thus 1
             const int BreakOnTermination = 0x1D;  // value for BreakOnTermination (flag)
 
             Process.EnterDebugMode();  //acquire Debug Privileges
@@ -63,8 +63,8 @@ namespace ClipboardMonitor
 
         public static void UnsetCriticalProcess()
         {
-            var isCritical = 0;  // we want this to be a Critical Process
-            const int BreakOnTermination = 0x0D;  // value for BreakOnTermination (flag)
+            var isCritical = 0;  // we want this to be a Normal Process, thus 0
+            const int BreakOnTermination = 0x1D;  // value for BreakOnTermination (flag)
 
             Process.EnterDebugMode();  //acquire Debug Privileges
 

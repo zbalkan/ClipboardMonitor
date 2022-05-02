@@ -8,6 +8,7 @@
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <DebugType>full</DebugType>
     <AnalysisLevel>latest-all</AnalysisLevel>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>

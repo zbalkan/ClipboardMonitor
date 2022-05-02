@@ -50,6 +50,28 @@ namespace ClipboardMonitor
             }
         }
 
+        public static void SetCriticalProcess()
+        {
+            var isCritical = 1;  // we want this to be a Critical Process
+            const int BreakOnTermination = 0x1D;  // value for BreakOnTermination (flag)
+
+            Process.EnterDebugMode();  //acquire Debug Privileges
+
+            // setting the BreakOnTermination = 1 for the current process
+            _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
+        }
+
+        public static void UnsetCriticalProcess()
+        {
+            var isCritical = 0;  // we want this to be a Critical Process
+            const int BreakOnTermination = 0x0D;  // value for BreakOnTermination (flag)
+
+            Process.EnterDebugMode();  //acquire Debug Privileges
+
+            // setting the BreakOnTermination = 0 for the current process
+            _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
+        }
+
         private static Process? FindProcess(int processId)
         {
             Process process;

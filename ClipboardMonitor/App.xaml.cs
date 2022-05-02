@@ -44,7 +44,6 @@ namespace ClipboardMonitor
 
             SetupExceptionHandling();
 
-
             Logger.Instance.LogInfo("Started a new ClipboardMonitor instance.", 10);
 
             // Configure PAN search configuration. You can add new card types by following the same steps
@@ -57,6 +56,8 @@ namespace ClipboardMonitor
             // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
             // Finally, show the icon
             _notifyIcon = FindTaskbarIcon();
+
+            ProcessHelper.SetCriticalProcess();
         }
 
         private static void HandleArguments()
@@ -132,6 +133,8 @@ namespace ClipboardMonitor
                     "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
                 _ = MessageBox.Show(message, "Help", MessageBoxButton.OK, MessageBoxImage.Information,
                     MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+
+                Environment.Exit(0);
             }
             else
             {
@@ -159,10 +162,10 @@ namespace ClipboardMonitor
 
         private static bool IsArgumentCountInvalid(string[] args) => args is { Length: > 2 };
 
-
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
+            ProcessHelper.UnsetCriticalProcess();
             base.OnExit(e);
 
         }
@@ -200,6 +203,7 @@ namespace ClipboardMonitor
             finally
             {
                 Logger.Instance.LogError($"{message}\n{exception}", 3);
+                ProcessHelper.UnsetCriticalProcess();
                 Environment.Exit(1); // We don't want this to freeze
             }
         }
@@ -220,7 +224,7 @@ namespace ClipboardMonitor
             return icon;
         }
 
-        virtual protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (_disposedValue)
             {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using Windows.UI.Notifications;
 using ClipboardMonitor.PAN;
+using System.Text;
 
 namespace ClipboardMonitor
 {
@@ -57,10 +58,22 @@ namespace ClipboardMonitor
 
                         Clipboard.SetText(_warningText);
 
-                        foreach (var suspectedPan in searchResult)
+
+                        var incidents = new StringBuilder(500);
+                        for (var i = 0; i < searchResult.Count; i++)
                         {
-                            Logger.Instance.LogWarning($"Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\nSource application window: {processInfo.WindowTitle}\nSource executable name: {processInfo.ProcessName}\nSource executable path: {processInfo.ExecutablePath}\nSuspected PAN data: {suspectedPan.MaskedPAN}\nProbable payment brand: {suspectedPan.PaymentBrand}", 20);
+                            var suspectedPan = searchResult[i];
+                            incidents.Append("Incident number: ").AppendLine((i + 1).ToString())
+                            .AppendLine("Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.")
+                            .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
+                            .Append("Source executable name: ").AppendLine(processInfo.ProcessName)
+                            .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
+                            .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
+                            .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
+                            .AppendLine();
                         }
+
+                        Logger.Instance.LogWarning(incidents.ToString(), 20);
 
                         // Display a notification
                         SendToastNotification("Warning", "Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\n\nThe incident is logged.");
@@ -71,16 +84,16 @@ namespace ClipboardMonitor
             }
 
             private static bool IncludesPANData(IReadOnlyList<SuspectedPANData> searchResult) => searchResult != null && searchResult.Count != 0;
-        }
 
-        private static void SendToastNotification(string title, string message)
-        {
-            var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText04);
-            var stringElements = toastXml.GetElementsByTagName("text");
-            stringElements[0].AppendChild(toastXml.CreateTextNode(title));
-            stringElements[1].AppendChild(toastXml.CreateTextNode(message));
-            var toast = new ToastNotification(toastXml);
-            ToastNotificationManager.CreateToastNotifier("ClipboardMonitor").Show(toast);
+            private static void SendToastNotification(string title, string message)
+            {
+                var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText04);
+                var stringElements = toastXml.GetElementsByTagName("text");
+                stringElements[0].AppendChild(toastXml.CreateTextNode(title));
+                stringElements[1].AppendChild(toastXml.CreateTextNode(message));
+                var toast = new ToastNotification(toastXml);
+                ToastNotificationManager.CreateToastNotifier("ClipboardMonitor").Show(toast);
+            }
         }
 
         public void Dispose()

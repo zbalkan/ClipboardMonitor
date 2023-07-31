@@ -12,3 +12,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Instead of throwing exception, we return null.", Scope = "member", Target = "~M:ClipboardMonitor.ProcessHelper.FindProcess(System.Int32)~System.Diagnostics.Process")]
 [assembly: SuppressMessage("Minor Code Smell", "S3261:Namespaces should not be empty", Justification = "The file is used to mark CLS compliance only.", Scope = "namespace", Target = "~N:ClipboardMonitor")]
 [assembly: SuppressMessage("Roslynator", "RCS1072:Remove empty namespace declaration.", Justification = "The file is used to mark CLS compliance only.", Scope = "namespace", Target = "~N:ClipboardMonitor")]
+[assembly: SuppressMessage("Globalization", "CA1305:Specify IFormatProvider", Justification = "<Pending>", Scope = "member", Target = "~M:ClipboardMonitor.ClipboardNotification.NotificationForm.WndProc(System.Windows.Forms.Message@)")]

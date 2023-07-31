@@ -116,7 +116,7 @@ namespace ClipboardMonitor
             _log.WriteEntry(EnrichLog(message), EventLogEntryType.Error, eventId);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-        private string EnrichLog(string message) => $"Local Time: {DateTime.Now:O}\nUTC Time: {DateTime.UtcNow:O}\nUser: {_username}\nDetails: \n{message}";
+        private string EnrichLog(string message) => $"Local Time: {DateTime.Now:O}\nUTC Time: {DateTime.UtcNow:O}\nUser: {_username}\nDetails: \n{message}\n";
 
         private void Dispose(bool disposing)
         {

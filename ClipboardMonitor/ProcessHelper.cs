@@ -34,14 +34,25 @@ namespace ClipboardMonitor
 
                 _ = NativeMethods.GetWindowThreadProcessId(activeWindow, out var processId);
                 var process = FindProcess(processId);
-                return process == null
-                    ? default
-                    : new ProcessInformation
+                if (process == null)
+                {
+                    return default;
+                }
+                else
+                {
+                    var executablePath = string.Empty;
+                    if (process.MainModule?.FileName != null)
+                    {
+                        executablePath = process.MainModule.FileName;
+                    }
+
+                    return new ProcessInformation
                     {
                         ProcessName = process.ProcessName,
-                        ExecutablePath = (process.MainModule != null ? process.MainModule.FileName : string.Empty) ?? string.Empty,
+                        ExecutablePath = executablePath,
                         WindowTitle = title.ToString()
                     };
+                }
             }
             catch (Exception ex)
             {

@@ -14,7 +14,7 @@ namespace ClipboardMonitor
         private readonly EventLog? _log;
         private static readonly Lazy<Logger> LazyInstance = new(() => new Logger());
 
-        public static Logger Instance = LazyInstance.Value;
+        public static readonly Logger Instance = LazyInstance.Value;
         private bool _disposedValue;
 
         private Logger()
@@ -60,7 +60,7 @@ namespace ClipboardMonitor
                 return;
             }
 
-            Debug.WriteLine("Uninstalling event log source.", 1);
+            Debug.WriteLine("Uninstalling event log source.");
 
             if (_log != null)
             {

@@ -30,7 +30,7 @@ namespace ClipboardMonitor.PAN
         {
             if (_paymentBrands == null || _paymentBrands.Count == 0)
             {
-                throw new ArgumentException("No payment brand is defined. Define at least one payment brand.", nameof(_paymentBrands));
+                throw new PANException("No payment brand is defined. Define at least one payment brand.");
             }
 
             if (string.IsNullOrEmpty(text))
@@ -49,7 +49,9 @@ namespace ClipboardMonitor.PAN
                     continue;
                 }
 
-                list.AddRange(result.Select(p => new SuspectedPANData {MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brand.ToString()}));
+                var brandName = brand.ToString();
+
+                list.AddRange(result.Select(p => new SuspectedPANData {MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brandName}));
             }
 
             return list.AsReadOnly();

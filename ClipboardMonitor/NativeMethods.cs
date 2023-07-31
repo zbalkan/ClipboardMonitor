@@ -14,7 +14,7 @@ namespace ClipboardMonitor
         public const int WM_CLIPBOARDUPDATE = 0x031D;
         //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
 #pragma warning disable IDE0090 // Use 'new(...)'
-        public static IntPtr HWND_MESSAGE = new IntPtr(-3);
+        public static readonly IntPtr HWND_MESSAGE = new IntPtr(-3);
 #pragma warning restore IDE0090 // Use 'new(...)'
 
         //Reference https://www.pinvoke.net/default.aspx/user32/AddClipboardFormatListener.html

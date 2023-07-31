@@ -4,23 +4,22 @@ using System.Text.RegularExpressions;
 
 namespace ClipboardMonitor.PaymentBrands
 {
-    abstract public class PaymentBrandBase
+    public abstract class PaymentBrandBase
     {
-        abstract public Regex Pattern { get; }
+        public abstract Regex GetPattern();
 
         public IReadOnlyList<string>? Parse(string text)
         {
-            var matches = Pattern.Matches(text);
+            var matches = GetPattern().Matches(text);
 
             if (matches is not {Count: > 0})
             {
                 return null;
             }
 
-            var readOnlyCollection = matches.Select(m => m.Value).ToList().AsReadOnly();
-            return readOnlyCollection;
+            return matches.Select(m => m.Value).ToList().AsReadOnly();
         }
 
-        public bool Validate(string cardNumber) => Pattern.IsMatch(cardNumber);
+        public bool Validate(string cardNumber) => GetPattern().IsMatch(cardNumber);
     }
 }

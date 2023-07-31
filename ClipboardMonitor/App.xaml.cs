@@ -56,8 +56,6 @@ namespace ClipboardMonitor
             // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
             // Finally, show the icon
             _notifyIcon = FindTaskbarIcon();
-
-            //ProcessHelper.SetCriticalProcess();
         }
 
         private static void HandleArguments()
@@ -229,7 +227,6 @@ namespace ClipboardMonitor
             //ProcessHelper.UnsetCriticalProcess();
             e.Cancel = false;
             base.OnSessionEnding(e);
-
         }
 
         protected virtual void Dispose(bool disposing)

@@ -8,7 +8,7 @@ namespace ClipboardMonitor
         {
             var returnValue = string.Empty;
             var staThread = new Thread(
-                delegate () {
+                () => {
                     // Use a fully qualified name for Clipboard otherwise it
                     // will end up calling itself.
                     returnValue = System.Windows.Forms.Clipboard.GetText();
@@ -20,11 +20,10 @@ namespace ClipboardMonitor
             return returnValue;
         }
 
-
         public static void SetText(string data)
         {
             var staThread = new Thread(
-                delegate () {
+                () => {
                     // Use a fully qualified name for Clipboard otherwise it
                     // will end up calling itself.
                     System.Windows.Forms.Clipboard.Clear();

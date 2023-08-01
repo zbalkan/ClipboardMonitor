@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Windows.Win32;
-using Windows.Win32.Security;
 
 namespace ClipboardMonitor
 {

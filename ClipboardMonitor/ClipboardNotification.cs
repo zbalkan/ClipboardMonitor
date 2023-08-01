@@ -1,15 +1,23 @@
-﻿using System;
+﻿// Ignore Spelling: CLIPBOARDUPDATE
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Windows.UI.Notifications;
 using ClipboardMonitor.PAN;
 using System.Text;
+using Windows.Win32;
 
 namespace ClipboardMonitor
 {
     public sealed class ClipboardNotification : IDisposable
     {
+        //Reference https://docs.microsoft.com/en-us/windows/desktop/dataxchg/wm-clipboardupdate
+        public const int WM_CLIPBOARDUPDATE = 0x031D;
+
+        private static readonly IntPtr HWND_MESSAGE = new(-3); //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
+
         private readonly NotificationForm _notificationForm;
         private bool _disposedValue;
         public ClipboardNotification(string warningText)
@@ -26,20 +34,20 @@ namespace ClipboardMonitor
                 _warningText = warningText;
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
-                NativeMethods.SetParent(Handle, NativeMethods.HWND_MESSAGE);
+                PInvoke.SetParent(Handle.AsHwnd(), HWND_MESSAGE.AsHwnd());
+
                 //Place window in the system-maintained clipboard format listener list
-                NativeMethods.AddClipboardFormatListener(Handle);
+                PInvoke.AddClipboardFormatListener(Handle.AsHwnd());
             }
 
             protected override void WndProc(ref Message m)
             {
                 //Listen for operating system messages
-                if (m.Msg == NativeMethods.WM_CLIPBOARDUPDATE)
+                if (m.Msg == WM_CLIPBOARDUPDATE)
                 {
                     //Get the date and time for the current moment expressed as coordinated universal time (UTC).
                     var saveUtcNow = DateTime.UtcNow;
                     Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
-
 
                     //Write to stdout clipboard contents
                     var content = Clipboard.GetText();
@@ -57,7 +65,6 @@ namespace ClipboardMonitor
                         var processInfo = ProcessHelper.CaptureProcessInfo();
 
                         Clipboard.SetText(_warningText);
-
 
                         var incidents = new StringBuilder(500);
                         for (var i = 0; i < searchResult.Count; i++)

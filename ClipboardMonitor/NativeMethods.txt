@@ -1,0 +1,10 @@
+AddClipboardFormatListener
+SetParent
+GetWindowText
+GetWindowTextLength
+GetForegroundWindow
+GetWindowThreadProcessId
+GetCurrentProcess
+GetKernelObjectSecurity
+SetKernelObjectSecurity
+NtSetInformationProcess

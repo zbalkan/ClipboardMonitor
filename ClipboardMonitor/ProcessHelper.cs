@@ -2,9 +2,11 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
+using Windows.Win32;
+using Windows.Win32.Security;
 
 namespace ClipboardMonitor
 {
@@ -27,13 +29,14 @@ namespace ClipboardMonitor
         {
             try
             {
-                var activeWindow = NativeMethods.GetForegroundWindow();
-                var length = NativeMethods.GetWindowTextLength(activeWindow);
-                var title = new StringBuilder(length + 1);
-                _ = NativeMethods.GetWindowText(activeWindow, title, title.Capacity);
+                var activeWindowHandle = PInvoke.GetForegroundWindow();
+                uint pid = 0;
+                unsafe
+                {
+                    _ = PInvoke.GetWindowThreadProcessId(activeWindowHandle, &pid);
+                }
 
-                _ = NativeMethods.GetWindowThreadProcessId(activeWindow, out var processId);
-                var process = FindProcess(processId);
+                var process = FindProcessById((int)pid);
                 if (process == null)
                 {
                     return default;
@@ -46,11 +49,21 @@ namespace ClipboardMonitor
                         executablePath = process.MainModule.FileName;
                     }
 
+                    string title;
+                    if (process.MainWindowHandle != IntPtr.Zero && process.MainWindowHandle != activeWindowHandle)
+                    {
+                        title = GetWindowTitle(activeWindowHandle);
+                    }
+                    else
+                    {
+                        title = process.MainWindowTitle;
+                    }
+
                     return new ProcessInformation
                     {
                         ProcessName = process.ProcessName,
                         ExecutablePath = executablePath,
-                        WindowTitle = title.ToString()
+                        WindowTitle = title
                     };
                 }
             }
@@ -59,6 +72,23 @@ namespace ClipboardMonitor
                 Debug.WriteLine(ex.Message);
                 return default;
             }
+        }
+
+        private static string GetWindowTitle(IntPtr activeWindow)
+        {
+            var length = PInvoke.GetWindowTextLength(activeWindow.AsHwnd());
+            string? title;
+            unsafe
+            {
+                Span<char> text = stackalloc char[length + 1]; // value gotten from GetWindowTextLength
+                fixed (char* pText = text)
+                {
+                    _ = PInvoke.GetWindowText((Windows.Win32.Foundation.HWND)activeWindow, pText, length + 1);
+                    title = Marshal.PtrToStringAuto((IntPtr)pText);
+                }
+            }
+
+            return title ?? string.Empty;
         }
 
         public static void SetCriticalProcess()
@@ -83,7 +113,7 @@ namespace ClipboardMonitor
             _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
         }
 
-        private static Process? FindProcess(int processId)
+        private static Process? FindProcessById(int processId)
         {
             Process process;
 
@@ -104,7 +134,8 @@ namespace ClipboardMonitor
         public static void Cover()
         {
             // Get the current process handle
-            var hProcess = NativeMethods.GetCurrentProcess();
+            var hProcess = PInvoke.GetCurrentProcess_SafeHandle();
+
             // Read the DACL
             var dacl = GetProcessSecurityDescriptor(hProcess);
 
@@ -117,6 +148,8 @@ namespace ClipboardMonitor
             // Save the DACL
             SetProcessSecurityDescriptor(hProcess, dacl);
             _isProtected = true;
+
+            hProcess.Dispose();
         }
 
         public static void Uncover()
@@ -127,7 +160,8 @@ namespace ClipboardMonitor
             }
 
             // Get the current process handle
-            var hProcess = NativeMethods.GetCurrentProcess();
+            var hProcess = PInvoke.GetCurrentProcess_SafeHandle();
+
             // Read the DACL
             var dacl = GetProcessSecurityDescriptor(hProcess);
 
@@ -140,41 +174,43 @@ namespace ClipboardMonitor
             // Save the DACL
             SetProcessSecurityDescriptor(hProcess, dacl);
             _isProtected = false;
+
+            hProcess.Dispose();
         }
 
-        private static RawSecurityDescriptor GetProcessSecurityDescriptor(IntPtr processHandle)
+        private static RawSecurityDescriptor GetProcessSecurityDescriptor(SafeHandle processHandle)
         {
-            if (processHandle == IntPtr.Zero)
+            if (processHandle.DangerousGetHandle() == IntPtr.Zero)
             {
                 throw new ArgumentException("The process handle is invalid.", nameof(processHandle));
             }
 
             var psd = Array.Empty<byte>();
             // Call with 0 size to obtain the actual size needed in bufSizeNeeded
-            _ = NativeMethods.GetKernelObjectSecurity(processHandle, DACL_SECURITY_INFORMATION, psd, 0, out var bufSizeNeeded);
+            _ = NativeMethods.GetKernelObjectSecurity(processHandle.DangerousGetHandle(), DACL_SECURITY_INFORMATION, psd, 0, out var bufSizeNeeded);
             if (bufSizeNeeded > short.MaxValue)
             {
                 throw new Win32Exception();
             }
             // Allocate the required bytes and obtain the DACL
-            if (!NativeMethods.GetKernelObjectSecurity(processHandle, DACL_SECURITY_INFORMATION, psd = new byte[bufSizeNeeded], bufSizeNeeded, out _))
-            {
-                throw new Win32Exception();
-            }
+            if (!NativeMethods.GetKernelObjectSecurity(processHandle.DangerousGetHandle(), DACL_SECURITY_INFORMATION, psd = new byte[bufSizeNeeded], bufSizeNeeded, out _))
+                {
+                    throw new Win32Exception();
+                }
             // Use the RawSecurityDescriptor class from System.Security.AccessControl to parse the bytes:
             return new RawSecurityDescriptor(psd, 0);
         }
 
-        private static void SetProcessSecurityDescriptor(IntPtr processHandle, RawSecurityDescriptor dacl)
+        private static void SetProcessSecurityDescriptor(SafeHandle processHandle, RawSecurityDescriptor dacl)
         {
-            if (processHandle == IntPtr.Zero)
+            if (processHandle.DangerousGetHandle() == IntPtr.Zero)
             {
                 throw new ArgumentException("The process handle is invalid.", nameof(processHandle));
             }
 
             var pSecurityDescriptor = new byte[dacl.BinaryLength];
             dacl.GetBinaryForm(pSecurityDescriptor, 0);
-            if (!NativeMethods.SetKernelObjectSecurity(processHandle, DACL_SECURITY_INFORMATION, pSecurityDescriptor))
+            if (!NativeMethods.SetKernelObjectSecurity(processHandle.DangerousGetHandle(), DACL_SECURITY_INFORMATION, pSecurityDescriptor))
             {
                 throw new Win32Exception();
             }

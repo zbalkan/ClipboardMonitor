@@ -5,6 +5,8 @@ GetWindowTextLength
 GetForegroundWindow
 GetWindowThreadProcessId
 GetCurrentProcess
-GetKernelObjectSecurity
-SetKernelObjectSecurity
-NtSetInformationProcess
+
+// Below methods do not work properly with or does not exist in CsWin32
+//GetKernelObjectSecurity
+//SetKernelObjectSecurity
+//NtSetInformationProcess

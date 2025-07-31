@@ -3,11 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Windows.Forms;
-using Windows.UI.Notifications;
-using ClipboardMonitor.PAN;
 using System.Text;
-using Windows.Win32;
+using System.Windows.Forms;
+using ClipboardMonitor.PAN;
+using Hardcodet.Wpf.TaskbarNotification;
 
 namespace ClipboardMonitor
 {
@@ -16,28 +15,31 @@ namespace ClipboardMonitor
         //Reference https://docs.microsoft.com/en-us/windows/desktop/dataxchg/wm-clipboardupdate
         public const int WM_CLIPBOARDUPDATE = 0x031D;
 
-        private static readonly IntPtr HWND_MESSAGE = new(-3); //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
+        private static readonly IntPtr HWND_MESSAGE = new IntPtr(-3); //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
 
         private readonly NotificationForm _notificationForm;
+
         private bool _disposedValue;
-        public ClipboardNotification(string warningText)
+        public ClipboardNotification(string warningText, TaskbarIcon icon)
         {
-            _notificationForm = new NotificationForm(warningText);
+            _notificationForm = new NotificationForm(warningText, icon);
         }
 
         private sealed class NotificationForm : Form
         {
             private readonly string _warningText;
+            private readonly TaskbarIcon _notifyIcon;
 
-            public NotificationForm(string warningText)
+            public NotificationForm(string warningText, TaskbarIcon icon)
             {
                 _warningText = warningText;
+                _notifyIcon = icon;
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
-                PInvoke.SetParent(Handle.AsHwnd(), HWND_MESSAGE.AsHwnd());
+                NativeMethods.SetParent(Handle, HWND_MESSAGE);
 
                 //Place window in the system-maintained clipboard format listener list
-                PInvoke.AddClipboardFormatListener(Handle.AsHwnd());
+                NativeMethods.AddClipboardFormatListener(Handle);
             }
 
             protected override void WndProc(ref Message m)
@@ -53,7 +55,7 @@ namespace ClipboardMonitor
                     var content = Clipboard.GetText();
 
                     // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
-                    if (content == null)
+                    if (string.IsNullOrEmpty(content))
                     {
                         return;
                     }
@@ -77,6 +79,7 @@ namespace ClipboardMonitor
                             .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
                             .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
                             .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
+                            .AppendLine("----------") // Used as delimiter
                             .AppendLine();
                         }
 
@@ -89,18 +92,9 @@ namespace ClipboardMonitor
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
-
             private static bool IncludesPANData(IReadOnlyList<SuspectedPANData> searchResult) => searchResult != null && searchResult.Count != 0;
 
-            private static void SendToastNotification(string title, string message)
-            {
-                var toastXml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText04);
-                var stringElements = toastXml.GetElementsByTagName("text");
-                stringElements[0].AppendChild(toastXml.CreateTextNode(title));
-                stringElements[1].AppendChild(toastXml.CreateTextNode(message));
-                var toast = new ToastNotification(toastXml);
-                ToastNotificationManager.CreateToastNotifier("ClipboardMonitor").Show(toast);
-            }
+            private void SendToastNotification(string title, string message) => _notifyIcon.ShowBalloonTip(title, message, BalloonIcon.Warning);
         }
 
         public void Dispose()

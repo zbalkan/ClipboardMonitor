@@ -11,9 +11,9 @@ namespace ClipboardMonitor.PAN
 
         private const int MinimumPANLength = 15;
 
-        private static readonly Lazy<PANData> LazyInstance = new(() => new PANData());
+        private static readonly Lazy<PANData> LazyInstance = new Lazy<PANData>(() => new PANData());
 
-        public static PANData Instance { get; } = LazyInstance.Value;
+        public static PANData Instance => LazyInstance.Value;
 
         private PANData()
         {
@@ -44,14 +44,14 @@ namespace ClipboardMonitor.PAN
             foreach (var brand in _paymentBrands)
             {
                 var result = brand.Parse(text);
-                if (result == null)
+                if (result.Count == 0)
                 {
                     continue;
                 }
 
                 var brandName = brand.ToString();
 
-                list.AddRange(result.Select(p => new SuspectedPANData {MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brandName}));
+                list.AddRange(result.Select(p => new SuspectedPANData { MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brandName }));
             }
 
             return list.AsReadOnly();
@@ -61,13 +61,12 @@ namespace ClipboardMonitor.PAN
         ///     By default all PANs are masked
         /// </summary>
         /// <para>
-        ///     PCI-DSS v3.2 - Req.3.3: Mask PAN when displayed (the first six and last four digits 
-        ///     are the maximum number of digits to be displayed), such that only personnel with a legitimate
-        ///     business need can see more than the first six/last four digits of the PAN.
+        ///     PCI DSS 4.0.1 Req. 3.4.1: PAN is masked when displayed (the BIN and last four digits are the maximum number of digits to be displayed), 
+        ///     such that only personnel with a legitimate business need can see more than the BIN and last four digits of the PAN.
         /// </para>
         /// <see href="https://www.pcisecuritystandards.org/"/>
         /// <param name="cardNumber">PAN</param>
-        /// <returns></returns>
+        /// <returns>Masked string</returns>
         private string Mask(string cardNumber)
         {
             if (string.IsNullOrEmpty(cardNumber))
@@ -75,8 +74,8 @@ namespace ClipboardMonitor.PAN
                 throw new ArgumentException($"'{nameof(cardNumber)}' cannot be null or empty.", nameof(cardNumber));
             }
 
-            var first = cardNumber[..6];
-            var middle = cardNumber[6..^4];
+            var first = cardNumber.Substring(0, 6);
+            var middle = cardNumber.Substring(6, cardNumber.Length - 10);
             var last = cardNumber.Substring(cardNumber.Length - 5, 4);
 
             var maskedArray = new char[middle.Length];
@@ -96,6 +95,6 @@ namespace ClipboardMonitor.PAN
             return string.Concat(first, new string(maskedArray), last);
         }
 
-        private string GetOnlyNumbers(string input) => new(input.Where(char.IsDigit).ToArray());
+        private string GetOnlyNumbers(string input) => new string(input.Where(char.IsDigit).ToArray());
     }
 }

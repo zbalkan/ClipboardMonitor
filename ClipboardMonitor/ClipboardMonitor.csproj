@@ -1,47 +1,127 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7DA2F416-C0A8-4517-8AE6-AA1BF88FCBDC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>True</UseWPF>
-    <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <DebugType>full</DebugType>
-    <AnalysisLevel>latest-all</AnalysisLevel>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <UseWindowsForms>True</UseWindowsForms>
+    <RootNamespace>ClipboardMonitor</RootNamespace>
+    <AssemblyName>ClipboardMonitor</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>ClipboardMonitor.App</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
-    <None Remove="Assets\icon.ico" />
-    <None Remove="Assets\icon.png" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
-
   <ItemGroup>
-    <EmbeddedResource Include="Assets\icon.ico" />
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
-
   <ItemGroup>
-    <Resource Include="Assets\icon.ico" />
-    <EmbeddedResource Include="Assets\icon.png" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Clipboard.cs" />
+    <Compile Include="ClipboardNotification.cs" />
+    <Compile Include="DelegateCommand.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Logger.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="NotifyIconViewModel.cs" />
+    <Compile Include="PANException.cs" />
+    <Compile Include="PAN\Luhn.cs" />
+    <Compile Include="PAN\PANData.cs" />
+    <Compile Include="PAN\SuspectedPANData.cs" />
+    <Compile Include="PaymentBrands\Amex.cs" />
+    <Compile Include="PaymentBrands\IPaymentBrand.cs" />
+    <Compile Include="PaymentBrands\Mastercard.cs" />
+    <Compile Include="PaymentBrands\PaymentBrandBase.cs" />
+    <Compile Include="PaymentBrands\Visa.cs" />
+    <Compile Include="ProcessHelper.cs" />
+    <Compile Include="ProcessInformation.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
-    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.18-beta">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <None Include="App.config" />
   </ItemGroup>
-
   <ItemGroup>
-    <Page Update="NotifyIconResources.xaml">
-      <Generator></Generator>
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    <Page Include="AboutWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="NotifyIconResources.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
-
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Resource Include="Assets\icon.ico" />
+    <Resource Include="Assets\icon.png" />
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf">
+      <Version>2.0.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

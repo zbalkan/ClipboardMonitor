@@ -20,7 +20,7 @@ namespace ClipboardMonitor.PAN
 
             var sum = 0;
             var alternate = false;
-            var nx = cardNumber.Replace("-", "", StringComparison.OrdinalIgnoreCase).Replace(" ", "", StringComparison.OrdinalIgnoreCase).ToArray();
+            var nx = cardNumber.Replace("-", "").Replace(" ", "").ToArray();
 
             for (var i = nx.Length - 1; i >= 0; i--)
             {

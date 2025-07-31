@@ -16,8 +16,8 @@ namespace ClipboardMonitor
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private TaskbarIcon? _notifyIcon;
-        private ClipboardNotification? _notification;
+        private TaskbarIcon _notifyIcon;
+        private ClipboardNotification _notification;
         private bool _disposedValue;
 
         [STAThread]
@@ -51,11 +51,12 @@ namespace ClipboardMonitor
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex());
 
-            _notification = new ClipboardNotification("REDACTED");
-
             // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
             // Finally, show the icon
             _notifyIcon = FindTaskbarIcon();
+
+            _notification = new ClipboardNotification("REDACTED", _notifyIcon);
+
         }
 
         private static void HandleArguments()
@@ -143,22 +144,22 @@ namespace ClipboardMonitor
         private static bool IsNormalStart(string[] args) => args.Length == 1;
 
         private static bool IsHelpCommand(string[] args) =>
-            args is { Length: 2 } && (args[1].Equals("-?", StringComparison.Ordinal) ||
+            (args.Length == 2) && (args[1].Equals("-?", StringComparison.Ordinal) ||
                                     args[1].Equals("-h", StringComparison.Ordinal) ||
                                     args[1].Equals("/h", StringComparison.Ordinal) ||
                                     args[1].Equals("--help", StringComparison.Ordinal));
 
         private static bool IsUninstallCommand(string[] args) =>
-            args is { Length: 2 } && (args[1].Equals("-u", StringComparison.Ordinal) ||
+            (args.Length == 2) && (args[1].Equals("-u", StringComparison.Ordinal) ||
                                     args[1].Equals("/u", StringComparison.Ordinal) ||
                                     args[1].Equals("--uninstall", StringComparison.Ordinal));
 
         private static bool IsInstallCommand(string[] args) =>
-            args is { Length: 2 } && (args[1].Equals("-i", StringComparison.Ordinal) ||
+            (args.Length == 2) && (args[1].Equals("-i", StringComparison.Ordinal) ||
                                     args[1].Equals("/i", StringComparison.Ordinal) ||
                                     args[1].Equals("--install", StringComparison.Ordinal));
 
-        private static bool IsArgumentCountInvalid(string[] args) => args is { Length: > 2 };
+        private static bool IsArgumentCountInvalid(string[] args) => args.Length > 2;
 
         private void SetupExceptionHandling()
         {
@@ -184,7 +185,7 @@ namespace ClipboardMonitor
             try
             {
                 var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                message = $"Unhandled exception in { (object?)assemblyName.Name} v{ (object?)assemblyName.Version}";
+                message = $"Unhandled exception in {assemblyName.Name} v{assemblyName.Version}";
             }
             catch (Exception ex)
             {
@@ -198,13 +199,13 @@ namespace ClipboardMonitor
             }
         }
 
-        private TaskbarIcon? FindTaskbarIcon()
+        private TaskbarIcon FindTaskbarIcon()
         {
-            TaskbarIcon? icon;
+            TaskbarIcon icon;
 
             try
             {
-                icon = (TaskbarIcon?)FindResource("NotifyIcon");
+                icon = (TaskbarIcon)FindResource("NotifyIcon");
             }
             catch (ResourceReferenceKeyNotFoundException)
             {

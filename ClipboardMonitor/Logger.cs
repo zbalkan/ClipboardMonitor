@@ -11,8 +11,8 @@ namespace ClipboardMonitor
         private const string Log = "ClipboardMonitor";
 
         private readonly string _username;
-        private readonly EventLog? _log;
-        private static readonly Lazy<Logger> LazyInstance = new(() => new Logger());
+        private readonly EventLog _log;
+        private static readonly Lazy<Logger> LazyInstance = new Lazy<Logger>(() => new Logger());
 
         public static readonly Logger Instance = LazyInstance.Value;
         private bool _disposedValue;

@@ -8,10 +8,10 @@ namespace ClipboardMonitor.PAN
 
         public string PaymentBrand { get; set; }
 
-        public readonly override string ToString() => $"{MaskedPAN} [{PaymentBrand}]";
-        public readonly override bool Equals(object? obj) => obj is SuspectedPANData data && Equals(data);
-        public readonly bool Equals(SuspectedPANData other) => MaskedPAN == other.MaskedPAN && PaymentBrand == other.PaymentBrand;
-        public readonly override int GetHashCode() => HashCode.Combine(MaskedPAN, PaymentBrand);
+        public override string ToString() => $"{MaskedPAN} [{PaymentBrand}]";
+        public override bool Equals(object obj) => obj is SuspectedPANData data && Equals(data);
+        public bool Equals(SuspectedPANData other) => MaskedPAN == other.MaskedPAN && PaymentBrand == other.PaymentBrand;
+        public override int GetHashCode() => (MaskedPAN, PaymentBrand).GetHashCode();
 
         public static bool operator ==(SuspectedPANData left, SuspectedPANData right) => left.Equals(right);
 

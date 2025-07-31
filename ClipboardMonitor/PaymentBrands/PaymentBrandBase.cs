@@ -8,16 +8,16 @@ namespace ClipboardMonitor.PaymentBrands
     {
         public abstract Regex GetPattern();
 
-        public IReadOnlyList<string>? Parse(string text)
+        public IReadOnlyList<string> Parse(string text)
         {
             var matches = GetPattern().Matches(text);
 
-            if (matches is not {Count: > 0})
+            if (matches.Count == 0)
             {
-                return null;
+                return (IReadOnlyList<string>)Enumerable.Empty<string>();
             }
 
-            return matches.Select(m => m.Value).ToList().AsReadOnly();
+            return matches.Cast<Match>().Select(m => m.Value).ToList().AsReadOnly();
         }
 
         public bool Validate(string cardNumber) => GetPattern().IsMatch(cardNumber);

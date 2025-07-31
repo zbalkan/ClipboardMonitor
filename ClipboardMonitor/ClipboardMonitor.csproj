@@ -72,6 +72,12 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AMSI\NativeMethods.cs" />
+    <Compile Include="AMSI\AmsiContext.cs" />
+    <Compile Include="AMSI\AmsiContextSafeHandle.cs" />
+    <Compile Include="AMSI\AmsiResult.cs" />
+    <Compile Include="AMSI\AmsiSession.cs" />
+    <Compile Include="AMSI\AmsiSessionSafeHandle.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

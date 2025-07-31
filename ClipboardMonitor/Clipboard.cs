@@ -33,5 +33,34 @@ namespace ClipboardMonitor
             staThread.Start();
             staThread.Join();
         }
+        public static bool HasDataFormat(string format)
+        {
+            var returnValue = false;
+            var staThread = new Thread(
+                () => {
+                    // Use a fully qualified name for Clipboard otherwise it
+                    // will end up calling itself.
+                    var data = System.Windows.Forms.Clipboard.GetDataObject();
+                    if (data != null)
+                    {
+                        var dob = new System.Windows.Forms.DataObject(data);
+                        var formats = dob.GetFormats(true);
+
+                        foreach (var f in formats)
+                        {
+                            if (format.Equals(f))
+                            {
+                                returnValue = true;
+                            }
+                        }
+
+                    }
+                });
+            staThread.SetApartmentState(ApartmentState.STA);
+            staThread.Start();
+            staThread.Join();
+
+            return returnValue;
+        }
     }
 }

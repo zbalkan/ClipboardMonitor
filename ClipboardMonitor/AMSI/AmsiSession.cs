@@ -18,7 +18,9 @@ namespace ClipboardMonitor.AMSI
         {
             var returnValue = NativeMethods.AmsiScanString(_context, payload, contentName, _session, out var result);
             if (returnValue != 0)
+            {
                 throw new Win32Exception(returnValue);
+            }
 
             return NativeMethods.AmsiResultIsMalware(result);
         }
@@ -27,7 +29,9 @@ namespace ClipboardMonitor.AMSI
         {
             var returnValue = NativeMethods.AmsiScanBuffer(_context, payload, (uint)payload.Length, contentName, _session, out var result);
             if (returnValue != 0)
+            {
                 throw new Win32Exception(returnValue);
+            }
 
             return NativeMethods.AmsiResultIsMalware(result);
         }

@@ -33,13 +33,17 @@ namespace ClipboardMonitor
         public Alert Scan(string content)
         {
             // The logic comes from Eric Lawrence's article: https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/
-            if (Scanner.IsCopiedFromBrowser() && Scanner.IsSuspicious(content) && _amsiSession.IsMalware(content, "Clipboard"))
+            if (IsCopiedFromBrowser())
             {
-                return CreateAmsiAlert(content);
+                PasteGuard.PasteGuard.MarkRiskyBrowserCopy(content);
+                if (IsSuspicious(content) && _amsiSession.IsMalware(content, "Clipboard"))
+                {
+                    return CreateAmsiAlert(content);
+                }
             }
 
             var searchResult = PANData.Instance.Parse(content);
-            if (Scanner.IncludesPANData(searchResult))
+            if (IncludesPANData(searchResult))
             {
                 return CreatePanAlert(searchResult);
             }
@@ -48,23 +52,21 @@ namespace ClipboardMonitor
 
         private static Alert CreateAmsiAlert(string content)
         {
-            var result = new Alert();
-            result.Title = "AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.";
             var processInfo = ProcessHelper.CaptureProcessInfo();
+            var incidents = new StringBuilder(500);
+
             if (processInfo == default)
             {
-                var incidents = new StringBuilder(500);
                 incidents
                 .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
                 .Append("Suspected data: ").AppendLine(content)
                 .AppendLine("Failed to get executable information")
                 .AppendLine("----------") // Used as delimiter
                 .AppendLine();
-                result.Detail = incidents.ToString();
             }
             else
             {
-                var incidents = new StringBuilder(500);
+                incidents = new StringBuilder(500);
                 incidents
                 .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
                 .Append("Source process name: ").AppendLine(processInfo.ProcessName)
@@ -72,16 +74,18 @@ namespace ClipboardMonitor
                 .Append("Suspected data: ").AppendLine(content)
                 .AppendLine("----------") // Used as delimiter
                 .AppendLine();
-                result.Detail = incidents.ToString();
             }
-            result.Payload = content;
-            return result;
+            return new Alert
+            {
+                Title = "AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.",
+                Detail = incidents.ToString(),
+                Payload = content
+            };
         }
 
         private static Alert CreatePanAlert(IReadOnlyList<SuspectedPANData> searchResult)
         {
-            var result = new Alert();
-            result.Title = "Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.";
+
             var processInfo = ProcessHelper.CaptureProcessInfo();
             var incidents = new StringBuilder(500);
             if (processInfo == default)
@@ -114,9 +118,12 @@ namespace ClipboardMonitor
                         .AppendLine();
                 }
             }
-            result.Detail = incidents.ToString();
-            result.Payload = string.Join(", ", searchResult.Select(sr => sr.ToString()).ToArray());
-            return result;
+            return new Alert
+            {
+                Title = "Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.",
+                Detail = incidents.ToString(),
+                Payload = string.Join(", ", searchResult.Select(sr => sr.ToString()).ToArray())
+            };
         }
 
         private static bool IncludesPANData(IReadOnlyList<SuspectedPANData> searchResult) => searchResult != null && searchResult.Count != 0;
@@ -132,13 +139,18 @@ namespace ClipboardMonitor
 
         private static bool IsSuspicious(string content)
         {
-            if (string.IsNullOrEmpty(content)) return false;
+            if (string.IsNullOrEmpty(content))
+            {
+                return false;
+            }
 
             // Fast, allocation-free search with early exit
             foreach (var t in SuspiciousText)
             {
                 if (content.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0)
+                {
                     return true;
+                }
             }
             return false;
         }

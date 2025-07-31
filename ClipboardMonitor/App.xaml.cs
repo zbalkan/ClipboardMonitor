@@ -57,6 +57,7 @@ namespace ClipboardMonitor
 
             _notification = new ClipboardNotification("REDACTED", _notifyIcon);
 
+            PasteGuard.PasteGuard.Install();
         }
 
         private static void HandleArguments()
@@ -166,14 +167,12 @@ namespace ClipboardMonitor
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
                 LogUnhandledException((Exception)e.ExceptionObject, "AppDomain.CurrentDomain.UnhandledException");
 
-            DispatcherUnhandledException += (s, e) =>
-            {
+            DispatcherUnhandledException += (s, e) => {
                 LogUnhandledException(e.Exception, "Application.Current.DispatcherUnhandledException");
                 e.Handled = true;
             };
 
-            TaskScheduler.UnobservedTaskException += (s, e) =>
-            {
+            TaskScheduler.UnobservedTaskException += (s, e) => {
                 LogUnhandledException(e.Exception, "TaskScheduler.UnobservedTaskException");
                 e.SetObserved();
             };
@@ -218,6 +217,7 @@ namespace ClipboardMonitor
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
+            PasteGuard.PasteGuard.Remove();
             //ProcessHelper.UnsetCriticalProcess();
             base.OnExit(e);
         }

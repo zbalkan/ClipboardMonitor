@@ -16,7 +16,9 @@ namespace ClipboardMonitor.AMSI
         {
             var result = NativeMethods.AmsiInitialize(applicationName, out var context);
             if (result != 0)
+            {
                 throw new Win32Exception(result);
+            }
 
             return new AmsiContext(context);
         }
@@ -26,7 +28,9 @@ namespace ClipboardMonitor.AMSI
             var result = NativeMethods.AmsiOpenSession(_context, out var session);
             session.Context = _context;
             if (result != 0)
+            {
                 throw new Win32Exception(result);
+            }
 
             return new AmsiSession(_context, session);
         }

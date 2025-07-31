@@ -4,12 +4,6 @@ using System.Text;
 
 namespace ClipboardMonitor
 {
-    // These methods cannot be provided by CsWin32 properly.
-    // References:
-    //https://stackoverflow.com/questions/621577/clipboard-event-c-sharp
-    //https://stackoverflow.com/questions/17762037/error-while-trying-to-copy-string-to-clipboard
-    //https://gist.github.com/glombard/7986317
-
     internal static class NativeMethods
     {
         #region advapi32.dll
@@ -34,9 +28,9 @@ namespace ClipboardMonitor
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool AddClipboardFormatListener(IntPtr hwnd);
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern IntPtr GetForegroundWindow();
+        internal static extern IntPtr GetClipboardOwner();
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]

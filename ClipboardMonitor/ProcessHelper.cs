@@ -28,57 +28,59 @@ namespace ClipboardMonitor
         {
             try
             {
-                var activeWindowHandle = NativeMethods.GetForegroundWindow();
-                var pid = IntPtr.Zero;
-                unsafe
+                var ownerWindow = NativeMethods.GetClipboardOwner();
+
+                // Get the title
+                string windowTitle = string.Empty;
+                if (ownerWindow != IntPtr.Zero)
                 {
-                    _ = NativeMethods.GetWindowThreadProcessId(activeWindowHandle, out pid);
+                    var length = NativeMethods.GetWindowTextLength(ownerWindow);
+                    var sb = new StringBuilder(length + 1);
+                    _ = NativeMethods.GetWindowText(ownerWindow, sb, length + 1);
+                    windowTitle = sb.ToString();
                 }
 
+                // Get process
+                NativeMethods.GetWindowThreadProcessId(ownerWindow, out var pid);
                 var process = FindProcessById(pid.ToInt32());
+
                 if (process == null)
                 {
                     return default;
                 }
-                else
+
+                // Fix windowTitle here
+                if (string.IsNullOrEmpty(windowTitle))
                 {
-                    var executablePath = string.Empty;
+                    windowTitle = process.MainWindowTitle;
+                }
+
+                // Get executable path here
+                var executablePath = string.Empty;
+                try
+                {
                     if (process.MainModule?.FileName != null)
                     {
                         executablePath = process.MainModule.FileName;
                     }
-
-                    string title;
-                    if (process.MainWindowHandle != IntPtr.Zero && process.MainWindowHandle != activeWindowHandle)
-                    {
-                        title = GetWindowTitle(activeWindowHandle);
-                    }
-                    else
-                    {
-                        title = process.MainWindowTitle;
-                    }
-
-                    return new ProcessInformation
-                    {
-                        ProcessName = process.ProcessName,
-                        ExecutablePath = executablePath,
-                        WindowTitle = title
-                    };
                 }
+                catch (Exception)
+                {
+                }
+
+                // Create the struct that carries basic info
+                return new ProcessInformation
+                {
+                    ProcessName = process.ProcessName,
+                    ExecutablePath = executablePath,
+                    WindowTitle = windowTitle
+                };
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
                 return default;
             }
-        }
-
-        private static string GetWindowTitle(IntPtr activeWindow)
-        {
-            var length = NativeMethods.GetWindowTextLength(activeWindow);
-            var sb = new StringBuilder(length + 1);
-            _ = NativeMethods.GetWindowText(activeWindow, sb, length + 1);
-            return sb.ToString() ?? string.Empty;
         }
 
         public static void SetCriticalProcess()

@@ -27,6 +27,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -88,7 +89,6 @@
     <Compile Include="Clipboard.cs" />
     <Compile Include="ClipboardNotification.cs" />
     <Compile Include="DelegateCommand.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="NotifyIconViewModel.cs" />

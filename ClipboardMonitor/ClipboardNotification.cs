@@ -148,52 +148,84 @@ namespace ClipboardMonitor
             {
                 var processInfo = ProcessHelper.CaptureProcessInfo();
 
+                // Set after getting the info. Otherwise we take the ownership with this command.
                 Clipboard.SetText(_warningText);
 
-                var incidents = new StringBuilder(500);
-                incidents.Append("Incident number: 1")
-                .AppendLine("Incident description: AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.")
-                .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
-                .Append("Source executable name: ").AppendLine(processInfo.ProcessName)
-                .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
-                .Append("Suspected data: ").AppendLine(content)
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-
+                StringBuilder incidents;
+                if (processInfo == default)
+                {
+                    incidents = new StringBuilder(500);
+                    incidents.Append("Incident number: 1")
+                    .AppendLine("Incident description: AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.")
+                    .Append("Suspected data: ").AppendLine(content)
+                    .AppendLine("Failed to get executable information")
+                    .AppendLine("----------") // Used as delimiter
+                    .AppendLine();
+                }
+                else
+                {
+                    incidents = new StringBuilder(500);
+                    incidents.Append("Incident number: 1")
+                    .AppendLine("Incident description: AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.")
+                    .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
+                    .Append("Source executable name: ").AppendLine(processInfo.ProcessName)
+                    .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
+                    .Append("Suspected data: ").AppendLine(content)
+                    .AppendLine("----------") // Used as delimiter
+                    .AppendLine();
+                }
                 Logger.Instance.LogWarning(incidents.ToString(), 20);
-
-                // Display a notification
-                SendToastNotification("Warning", "AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.\n\nThe incident is logged.");
+                SendWarning("AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.\n\nThe incident is logged.");
             }
 
             private void SendPanAlert(IReadOnlyList<SuspectedPANData> searchResult)
             {
                 var processInfo = ProcessHelper.CaptureProcessInfo();
 
+                // Set after getting the info. Otherwise we take the ownership with this command.
                 Clipboard.SetText(_warningText);
 
-                var incidents = new StringBuilder(500);
-                for (var i = 0; i < searchResult.Count; i++)
+
+                StringBuilder incidents;
+                if (processInfo == default)
                 {
-                    var suspectedPan = searchResult[i];
-                    incidents.Append("Incident number: ").AppendLine((i + 1).ToString())
-                    .AppendLine("Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.")
-                    .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
-                    .Append("Source executable name: ").AppendLine(processInfo.ProcessName)
-                    .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
-                    .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
-                    .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
-                    .AppendLine("----------") // Used as delimiter
-                    .AppendLine();
+                    incidents = new StringBuilder(500);
+                    for (var i = 0; i < searchResult.Count; i++)
+                    {
+                        var suspectedPan = searchResult[i];
+
+                        incidents.Append("Incident number: ").AppendLine((i + 1).ToString())
+                        .AppendLine("Incident description:  Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.")
+                        .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
+                        .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
+                        .AppendLine("Failed to get executable information")
+                        .AppendLine("----------") // Used as delimiter
+                        .AppendLine();
+                    }
+                }
+                else
+                {
+                    incidents = new StringBuilder(500);
+                    for (var i = 0; i < searchResult.Count; i++)
+                    {
+                        var suspectedPan = searchResult[i];
+                        incidents.Append("Incident number: ").AppendLine((i + 1).ToString())
+                        .AppendLine("Incident description: Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.")
+                        .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
+                        .Append("Source executable name: ").AppendLine(processInfo.ProcessName)
+                        .Append("Source executable path: ").AppendLine(processInfo.ExecutablePath)
+                        .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
+                        .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
+                        .AppendLine("----------") // Used as delimiter
+                        .AppendLine();
+                    }
                 }
 
                 Logger.Instance.LogWarning(incidents.ToString(), 20);
-
-                // Display a notification
-                SendToastNotification("Warning", "Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\n\nThe incident is logged.");
+                SendWarning("Suspected PAN data detected in clipboard. Clipboard is cleared and overwritten.\n\nThe incident is logged.");
             }
 
-            private void SendToastNotification(string title, string message) => _notifyIcon.ShowBalloonTip(title, message, BalloonIcon.Warning);
+            private void SendWarning(string message) => _notifyIcon.ShowBalloonTip("Warning", message, BalloonIcon.Warning);
         }
     }
 }

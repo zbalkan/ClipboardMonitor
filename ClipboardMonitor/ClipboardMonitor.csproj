@@ -85,6 +85,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ClipboardNotification.NotificationForm.cs" />
+    <Compile Include="PasteGuard\NativeMethods.cs" />
     <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="Scanner.cs" />
   </ItemGroup>

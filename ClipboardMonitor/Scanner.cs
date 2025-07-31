@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 using ClipboardMonitor.AMSI;
 using ClipboardMonitor.PAN;
 
@@ -28,6 +29,14 @@ namespace ClipboardMonitor
         {
             _amsiContext = AmsiContext.Create("ClipboardMonitor");
             _amsiSession = _amsiContext.CreateSession();
+            PasteGuard.PasteGuard.RegisterAction((riskyContent) => {
+                MessageBox.Show($"Pasting web content into the Run dialog is dangerous. Use extreme caution.\n\n{riskyContent}",
+                                "Danger!",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning,
+                                MessageBoxDefaultButton.Button1,
+                                MessageBoxOptions.ServiceNotification);
+            });
         }
 
         public Alert Scan(string content)

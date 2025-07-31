@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
@@ -11,7 +10,6 @@ namespace ClipboardMonitor
 {
     public static class ProcessHelper
     {
-        // ReSharper disable once InconsistentNaming
         private const int DACL_SECURITY_INFORMATION = 0x00000004;
 
         private static bool _isProtected;
@@ -31,7 +29,7 @@ namespace ClipboardMonitor
                 var ownerWindow = NativeMethods.GetClipboardOwner();
 
                 // Get the title
-                string windowTitle = string.Empty;
+                var windowTitle = string.Empty;
                 if (ownerWindow != IntPtr.Zero)
                 {
                     var length = NativeMethods.GetWindowTextLength(ownerWindow);
@@ -68,12 +66,16 @@ namespace ClipboardMonitor
                 {
                 }
 
+                // Get main module
+                var module = process.MainModule?.ModuleName ?? string.Empty;
+
                 // Create the struct that carries basic info
                 return new ProcessInformation
                 {
                     ProcessName = process.ProcessName,
                     ExecutablePath = executablePath,
-                    WindowTitle = windowTitle
+                    WindowTitle = windowTitle,
+                    MainModuleName = module
                 };
             }
             catch (Exception ex)

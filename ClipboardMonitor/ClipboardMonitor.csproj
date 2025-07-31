@@ -73,6 +73,7 @@
     <Compile Include="AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Alert.cs" />
     <Compile Include="AMSI\NativeMethods.cs" />
     <Compile Include="AMSI\AmsiContext.cs" />
     <Compile Include="AMSI\AmsiContextSafeHandle.cs" />
@@ -83,6 +84,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ClipboardNotification.NotificationForm.cs" />
+    <Compile Include="Scanner.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />

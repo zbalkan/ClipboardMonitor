@@ -67,6 +67,7 @@ namespace ClipboardMonitor
 
             protected override void Dispose(bool disposing)
             {
+                NativeMethods.RemoveClipboardFormatListener(Handle);
                 _scanner.Dispose();
                 base.Dispose(disposing);
             }

@@ -1,34 +1,44 @@
 # ClipboardMonitor
 
 ## Overview
-ClipboardMonitor is an application running in the background that tracks clipboard usage. The clipboard is checked against data copied from well-known browsers, run against AMSI for prevention of attacks asking users running commands.
-By default, every text copied into cliploard is also scanned to detect PAN data, as a sample and simple DLP-like tool.
+ClipboardMonitor is a lightweight background utility that tracks **clipboard** usage.
+It
+
+* filters text for high-risk tokens (`POWERSHELL`, `MSHTA`, `CMD`, `MSIEXEC`, etc.) copied **from well-known browsers**, and submits matches to **AMSI** for antivirus verdicts;
+* detects **payment-card PANs**, masks them, and scrubs the clipboard (sample DLP);
+* warns the user if they press **Win + R** within 30 s of a risky copy;  
+* logs every incident asynchronously to the Windows Event Log.
+* uses a toast notification to inform the user.
 
 ## Installation
-The logs are written into event log. In order to add or remove the log source, you need administration rights during installation and uninstallation.
+Logs are written to the Windows Event Log. Creating (or removing) the log source requires elevation.
 
-1. In an elevated terminal/cmd/powershell session, run `ClipboardMonitor -i` (or `/i` or `--install`).
-2. Run the `ClipboardMonitor`.
-3. Success.
+1. Open an **elevated** PowerShell / CMD window and run  
+   `ClipboardMonitor -i` (or `/i`, `--install`) to register the event-log source.  
+2. Launch `ClipboardMonitor.exe` normally (or place it in Startup / Task Scheduler).  
+3. Done.
 
 ### Uninstallation
-In an elevated terminal/cmd/powershell session, run `ClipboardMonitor -u` (or `/u` or `--uninstall`).
+Run **as Administrator**:  
+`ClipboardMonitor -u` (or `/u`, `--uninstall`) to remove the event-log source.
 
 ## Usage
 ```
 USAGE: ClipboardMonitor [ARGUMENTS]
--i,/i,--install			Installs the application (Needs Admin rights).
--u,/u,--uninstall		Installs the application (Needs Admin rights).
--?, -h, /h, --help		Displays this message box.
+-i,/i,--install      Registers the Windows-Event-Log source (Admin required).
+-u,/u,--uninstall    Removes   the Windows-Event-Log source (Admin required).
+-?, -h, /h, --help   Displays this message box.
+
 ```
 
 ### WARNING
-ClipboardMonitor requires Administrator (`SeDebugPrivilege`) privileges as of latest release.
-
-In case of interruption, such as running `taskkill` command or killing the process using Task Manager, user will get a BSOD `CRITICAL_PROCESS_DIED`.
+ClipboardMonitor itself runs fine under a standard user account.  
+An optional `ENABLE_CRITICAL_PROCESS` block (currently **commented-out** for safety) can mark the process as critical; if re-enabled and the process is forcibly terminated, Windows will bug-check with **CRITICAL_PROCESS_DIED**. Enable only in hardened production builds—**never during normal development**.
 
 ## Development
-ClipboardMonitor is built with .NET 4.8.1 and WPF. Therefore, you need Visual Studio with .NET Desktop Development features for development.
+The application s built with **.NET Framework 4.8.1** and WPF/C# 7.x and using Winforms components when needed.
+Test project uses .NET 9.0.
+Open the solution in Visual Studio (with *.NET Desktop Development* workload).
 
 ## Thanks
-Thanks Meziantou for [AMSI usage in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm). Also, thanks to the Eric Lawrence for his ClipShield project and the [great article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/) explaining it.
+Thanks to **Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm) and **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).

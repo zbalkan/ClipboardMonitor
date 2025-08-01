@@ -32,14 +32,7 @@ namespace ClipboardMonitor.PasteGuard
 
         private static Action<string> _registeredAction;
 
-        public static void RegisterAction(Action<string> action)
-        {
-            if (action == null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
-            _registeredAction = action;
-        }
+        public static void RegisterAction(Action<string> action) => _registeredAction = action ?? throw new ArgumentNullException(nameof(action));
 
         public static void Install()
         {

@@ -81,7 +81,13 @@ namespace ClipboardMonitor
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                return default;
+                return new ProcessInformation()
+                {
+                    ExecutablePath = string.Empty,
+                    MainModuleName = string.Empty,
+                    ProcessName = string.Empty,
+                    WindowTitle = string.Empty
+                };
             }
         }
 

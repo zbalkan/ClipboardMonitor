@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor.PasteGuard
 {
@@ -33,7 +34,7 @@ namespace ClipboardMonitor.PasteGuard
 
         public static void RegisterAction(Action<string> action)
         {
-            if (_registeredAction == null)
+            if (action == null)
             {
                 throw new ArgumentNullException(nameof(action));
             }
@@ -57,7 +58,7 @@ namespace ClipboardMonitor.PasteGuard
         {
             Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
             Volatile.Write(ref _riskContent,
-                           payload.Length > 200 ? payload.Substring(0, 200) : payload); // truncate / mask here
+                           payload.Length > 200 ? MaskPayload(payload.Substring(0, 200)) : MaskPayload(payload));
         }
 
         public static void Remove()
@@ -87,5 +88,7 @@ namespace ClipboardMonitor.PasteGuard
         private static bool IsRecentRisk() => DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
 
         private static bool WinHeld() => (NativeMethods.GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
+
+        private static string MaskPayload(string payload) => PANData.Instance.Sanitize(payload);
     }
 }

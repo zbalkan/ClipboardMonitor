@@ -57,11 +57,43 @@ namespace ClipboardMonitor.PAN
             return list.AsReadOnly();
         }
 
+        public string Sanitize(string text)
+        {
+            if (_paymentBrands == null || _paymentBrands.Count == 0)
+            {
+                throw new PANException("No payment brand is defined. Define at least one payment brand.");
+            }
+
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentException($"'{nameof(text)}' cannot be null or empty.", nameof(text));
+            }
+
+            var newText = string.Copy(text);
+
+            foreach (var brand in _paymentBrands) // O(m*n)
+            {
+                var result = brand.Parse(text);
+                if (result.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var r in result)
+                {
+                    newText.Replace(r, Mask(GetOnlyNumbers(r)));
+                }
+
+            }
+
+            return newText;
+        }
+
         /// <summary>
         ///     By default all PANs are masked
         /// </summary>
         /// <para>
-        ///     PCI DSS 4.0.1 Req. 3.4.1: PAN is masked when displayed (the BIN and last four digits are the maximum number of digits to be displayed), 
+        ///     PCI DSS 4.0.1 Req. 3.4.1: PAN is masked when displayed (the BIN and last four digits are the maximum number of digits to be displayed),
         ///     such that only personnel with a legitimate business need can see more than the BIN and last four digits of the PAN.
         /// </para>
         /// <see href="https://www.pcisecuritystandards.org/"/>

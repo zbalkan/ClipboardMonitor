@@ -67,7 +67,6 @@ namespace ClipboardMonitor
             if (processInfo == default)
             {
                 incidents
-                .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
                 .Append("Suspected data: ").AppendLine(content)
                 .AppendLine("Failed to get executable information")
                 .AppendLine("----------") // Used as delimiter
@@ -104,7 +103,6 @@ namespace ClipboardMonitor
                     var suspectedPan = searchResult[i];
                     incidents
                         .Append("Incident number: ").AppendLine((i + 1).ToString())
-                        .Append("Source application window: ").AppendLine(processInfo.WindowTitle)
                         .Append("Suspected PAN data: ").AppendLine(suspectedPan.MaskedPAN)
                         .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
                         .AppendLine("Failed to get executable information")
@@ -153,10 +151,13 @@ namespace ClipboardMonitor
                 return false;
             }
 
-            // Fast, allocation-free search with early exit
-            foreach (var t in SuspiciousText)
+            var normalised = content
+                    .Normalize(NormalizationForm.FormKD)
+                    .ToUpperInvariant();
+
+            foreach (var token in SuspiciousText)
             {
-                if (content.IndexOf(t, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (normalised.IndexOf(token, StringComparison.Ordinal) >= 0)
                 {
                     return true;
                 }

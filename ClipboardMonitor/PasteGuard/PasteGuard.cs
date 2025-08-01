@@ -45,11 +45,12 @@ namespace ClipboardMonitor.PasteGuard
         {
             if (_hook == IntPtr.Zero)
             {
+                var mainModuleName = ProcessHelper.GetProcessSummary().MainModuleName;
                 _hook = NativeMethods
                     .SetWindowsHookEx(
                     WH_KEYBOARD_LL,
                     _proc,
-                    NativeMethods.GetModuleHandle(ProcessHelper.GetProcessSummary().MainModuleName),
+                    NativeMethods.GetModuleHandle(mainModuleName),
                     0);
             }
         }

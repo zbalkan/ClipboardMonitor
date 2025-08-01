@@ -67,7 +67,15 @@ namespace ClipboardMonitor
                 }
 
                 // Get main module
-                var module = process.MainModule?.ModuleName ?? string.Empty;
+                var module = string.Empty;
+
+                try
+                {
+                    module = process.MainModule?.ModuleName;
+                }
+                catch (Exception)
+                {
+                }
 
                 // Create the struct that carries basic info
                 return new ProcessSummary

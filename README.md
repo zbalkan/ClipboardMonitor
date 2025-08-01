@@ -41,4 +41,4 @@ Test project uses .NET 9.0.
 Open the solution in Visual Studio (with *.NET Desktop Development* workload).
 
 ## Thanks
-Thanks to **Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm) and **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
+Thanks to **Gérald Barré, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm) and **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).

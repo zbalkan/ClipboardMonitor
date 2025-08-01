@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace ClipboardMonitor
 {
-    public static class Clipboard
+    public static class ClipboardHelper
     {
         public static string GetText()
         {
             var returnValue = string.Empty;
             var staThread = new Thread(
-                () => {
-                    // Use a fully qualified name for Clipboard otherwise it
-                    // will end up calling itself.
-                    returnValue = System.Windows.Forms.Clipboard.GetText();
-                });
+                () => returnValue = Clipboard.GetText());
             staThread.SetApartmentState(ApartmentState.STA);
             staThread.Start();
             staThread.Join();
@@ -33,10 +30,8 @@ namespace ClipboardMonitor
                 {
                     try
                     {
-                        // Use a fully qualified name for Clipboard otherwise it
-                        // will end up calling itself.
-                        System.Windows.Forms.Clipboard.Clear();
-                        System.Windows.Forms.Clipboard.SetText(data);
+                        Clipboard.Clear();
+                        Clipboard.SetText(data);
                         return;
                     }
                     catch (System.Runtime.InteropServices.ExternalException)
@@ -57,15 +52,11 @@ namespace ClipboardMonitor
             var returnValue = false;
             var staThread = new Thread(
                 () => {
-                    // Use a fully qualified name for Clipboard otherwise it
-                    // will end up calling itself.
-                    var data = System.Windows.Forms.Clipboard.GetDataObject();
+                    var data = Clipboard.GetDataObject();
                     if (data != null)
                     {
-                        var dob = new System.Windows.Forms.DataObject(data);
-                        var formats = dob.GetFormats(true);
-
-                        foreach (var f in formats)
+                        var dob = new DataObject(data);
+                        foreach (var f in dob.GetFormats(true))
                         {
                             if (format.Equals(f))
                             {

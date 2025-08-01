@@ -42,7 +42,7 @@ namespace ClipboardMonitor
                     Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
 
                     //Write to stdout clipboard contents
-                    var content = Clipboard.GetText();
+                    var content = ClipboardHelper.GetText();
 
                     // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
                     if (string.IsNullOrEmpty(content))
@@ -54,7 +54,7 @@ namespace ClipboardMonitor
 
                     if (alert != null)
                     {
-                        Clipboard.SetText(_warningText);
+                        ClipboardHelper.SetText(_warningText);
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";
                         Logger.Instance.LogWarning(logMessage, 20);
                         _notifyIcon.ShowBalloonTip("Warning", alert.Title + "\n\nThe incident is logged.", BalloonIcon.Warning);

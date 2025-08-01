@@ -32,7 +32,7 @@ namespace ClipboardMonitor.PAN
 
                     if (n > 9)
                     {
-                        n = n % 10 + 1;
+                        n = (n % 10) + 1;
                     }
                 }
                 sum += n;

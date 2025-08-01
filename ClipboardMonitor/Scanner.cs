@@ -137,9 +137,9 @@ namespace ClipboardMonitor
 
         private static bool IsCopiedFromBrowser()
         {
-            var fromChromium = Clipboard.HasDataFormat("Chromium internal source URL");
-            var fromFirefox = Clipboard.HasDataFormat("text/x-moz-url-priv");
-            var fromIE = Clipboard.HasDataFormat("msSourceUrl");
+            var fromChromium = ClipboardHelper.HasDataFormat("Chromium internal source URL");
+            var fromFirefox = ClipboardHelper.HasDataFormat("text/x-moz-url-priv");
+            var fromIE = ClipboardHelper.HasDataFormat("msSourceUrl");
 
             return fromChromium || fromFirefox || fromIE;
         }

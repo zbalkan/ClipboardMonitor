@@ -84,14 +84,13 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ClipboardNotification.NotificationForm.cs" />
+    <Compile Include="ClipboardNotification.NotificationHandlerForm.cs" />
     <Compile Include="PasteGuard\NativeMethods.cs" />
     <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="Scanner.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="Clipboard.cs" />
+    <Compile Include="ClipboardHelper.cs" />
     <Compile Include="ClipboardNotification.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="Logger.cs" />

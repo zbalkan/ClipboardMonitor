@@ -10,12 +10,12 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly TaskbarIcon _notifyIcon;
-            private readonly string _warningText;
+            private readonly string _substituteText;
             private readonly Scanner _scanner;
-            private bool _selfChange;
-            public NotificationHandlerForm(string warningText, TaskbarIcon icon)
+
+            public NotificationHandlerForm(string substituteText, TaskbarIcon icon)
             {
-                _warningText = warningText;
+                _substituteText = substituteText;
                 _notifyIcon = icon;
                 _scanner = new Scanner();
 
@@ -31,12 +31,6 @@ namespace ClipboardMonitor
                 //Listen for operating system messages
                 if (m.Msg == WM_CLIPBOARDUPDATE)
                 {
-                    if (_selfChange)
-                    {
-                        _selfChange = false;
-                        return;
-                    }
-
                     //Get the date and time for the current moment expressed as coordinated universal time (UTC).
                     var saveUtcNow = DateTime.UtcNow;
                     Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
@@ -45,7 +39,7 @@ namespace ClipboardMonitor
                     var content = ClipboardHelper.GetText();
 
                     // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
-                    if (string.IsNullOrEmpty(content))
+                    if (string.IsNullOrEmpty(content) || _substituteText.Equals(content))
                     {
                         return;
                     }
@@ -54,11 +48,10 @@ namespace ClipboardMonitor
 
                     if (alert != null)
                     {
-                        ClipboardHelper.SetText(_warningText);
+                        ClipboardHelper.SetText(_substituteText);
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";
                         Logger.Instance.LogWarning(logMessage, 20);
                         _notifyIcon.ShowBalloonTip("Warning", alert.Title + "\n\nThe incident is logged.", BalloonIcon.Warning);
-                        _selfChange = true;
                     }
                 }
                 //Called for any unhandled messages

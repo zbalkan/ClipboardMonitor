@@ -57,7 +57,7 @@ namespace ClipboardMonitor
                         Clipboard.SetText(_warningText);
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";
                         Logger.Instance.LogWarning(logMessage, 20);
-                        SendWarning(alert.Title);
+                        _notifyIcon.ShowBalloonTip("Warning", alert.Title + "\n\nThe incident is logged.", BalloonIcon.Warning);
                         _selfChange = true;
                     }
                 }
@@ -71,8 +71,6 @@ namespace ClipboardMonitor
                 _scanner.Dispose();
                 base.Dispose(disposing);
             }
-
-            private void SendWarning(string message) => _notifyIcon.ShowBalloonTip("Warning", message + "\n\nThe incident is logged.", BalloonIcon.Warning);
         }
     }
 }

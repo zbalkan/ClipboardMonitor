@@ -6,8 +6,8 @@ namespace ClipboardMonitor.Tests
     [TestClass]
     public class AmsiTests
     {
-        private AmsiContext _context;
-        private AmsiSession _session;
+        private AmsiContext _context = null!;
+        private AmsiSession _session = null!;
 
         [TestInitialize]
         public void Init()

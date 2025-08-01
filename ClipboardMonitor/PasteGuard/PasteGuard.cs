@@ -1,4 +1,6 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,13 +40,17 @@ namespace ClipboardMonitor.PasteGuard
         {
             if (_hook == IntPtr.Zero)
             {
-                var mainModuleName = ProcessHelper.GetProcessSummary().MainModuleName;
-                _hook = NativeMethods
-                    .SetWindowsHookEx(
-                    WH_KEYBOARD_LL,
-                    _proc,
-                    NativeMethods.GetModuleHandle(mainModuleName),
-                    0);
+                var hMod = NativeMethods.GetModuleHandle(null);
+                _hook = NativeMethods.SetWindowsHookEx(
+                            WH_KEYBOARD_LL,
+                            _proc,
+                            hMod,
+                            0);
+                if (_hook == IntPtr.Zero)
+                {
+                    throw new Win32Exception(Marshal.GetLastWin32Error(),
+                        "Failed to install keyboard hook.");
+                }
             }
         }
 

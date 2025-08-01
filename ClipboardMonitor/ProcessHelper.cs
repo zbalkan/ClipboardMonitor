@@ -22,7 +22,7 @@ namespace ClipboardMonitor
             return count > 1;
         }
 
-        public static ProcessSummary GetProcessSummary()
+        public static ProcessSummary GetClipboardOwnerProcess()
         {
             try
             {

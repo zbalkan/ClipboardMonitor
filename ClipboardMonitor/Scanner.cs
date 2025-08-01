@@ -61,7 +61,7 @@ namespace ClipboardMonitor
 
         private static Alert CreateAmsiAlert(string content)
         {
-            var processInfo = ProcessHelper.GetProcessSummary();
+            var processInfo = ProcessHelper.GetClipboardOwnerProcess();
             var incidents = new StringBuilder(500);
 
             if (processInfo == default)
@@ -94,7 +94,7 @@ namespace ClipboardMonitor
         private static Alert CreatePanAlert(IReadOnlyList<SuspectedPANData> searchResult)
         {
 
-            var processInfo = ProcessHelper.GetProcessSummary();
+            var processInfo = ProcessHelper.GetClipboardOwnerProcess();
             var incidents = new StringBuilder(500);
             if (processInfo == default)
             {

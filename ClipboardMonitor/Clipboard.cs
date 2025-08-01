@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Text;
 using System.Threading;
 
 namespace ClipboardMonitor
@@ -25,17 +23,35 @@ namespace ClipboardMonitor
 
         public static void SetText(string data)
         {
-            var staThread = new Thread(
-                () => {
-                    // Use a fully qualified name for Clipboard otherwise it
-                    // will end up calling itself.
-                    System.Windows.Forms.Clipboard.Clear();
-                    System.Windows.Forms.Clipboard.SetText(data);
-                });
+
+            const int MaxRetries = 3;
+            const int DelayMs = 100;
+
+            var staThread = new Thread(() =>
+            {
+                for (var i = 0; i < MaxRetries; i++)
+                {
+                    try
+                    {
+                        // Use a fully qualified name for Clipboard otherwise it
+                        // will end up calling itself.
+                        System.Windows.Forms.Clipboard.Clear();
+                        System.Windows.Forms.Clipboard.SetText(data);
+                        return;
+                    }
+                    catch (System.Runtime.InteropServices.ExternalException)
+                    {
+                        Thread.Sleep(DelayMs);
+                    }
+                }
+                throw new TimeoutException("Unable to overwrite the clipboard after 3 retries (300 ms total).");
+            });
+
             staThread.SetApartmentState(ApartmentState.STA);
             staThread.Start();
             staThread.Join();
         }
+
         public static bool HasDataFormat(string format)
         {
             var returnValue = false;

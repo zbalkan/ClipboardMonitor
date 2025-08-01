@@ -49,7 +49,7 @@ namespace ClipboardMonitor.PasteGuard
                     .SetWindowsHookEx(
                     WH_KEYBOARD_LL,
                     _proc,
-                    NativeMethods.GetModuleHandle(ProcessHelper.CaptureProcessInfo().MainModuleName),
+                    NativeMethods.GetModuleHandle(ProcessHelper.GetProcessSummary().MainModuleName),
                     0);
             }
         }

@@ -52,7 +52,7 @@ namespace ClipboardMonitor
 
                     var alert = _scanner.Scan(content);
 
-                    if (!Scanner.NoAlert.Equals(alert))
+                    if (alert != null)
                     {
                         Clipboard.SetText(_warningText);
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";

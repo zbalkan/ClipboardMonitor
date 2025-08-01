@@ -10,8 +10,6 @@ namespace ClipboardMonitor
 {
     internal class Scanner : IDisposable
     {
-        public static Alert NoAlert = new Alert { Title = string.Empty, Detail = string.Empty, Payload = string.Empty };
-
         private static readonly string[] SuspiciousText =
                 {
                 "pwsh",
@@ -29,14 +27,15 @@ namespace ClipboardMonitor
         {
             _amsiContext = AmsiContext.Create("ClipboardMonitor");
             _amsiSession = _amsiContext.CreateSession();
-            Action<string> warningAction = (riskyContent) => {
+            void warningAction(string riskyContent)
+            {
                 MessageBox.Show($"Pasting web content into the Run dialog is dangerous. Use extreme caution.\n\n{riskyContent}",
                                 "Danger!",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning,
                                 MessageBoxDefaultButton.Button1,
                                 MessageBoxOptions.ServiceNotification);
-            };
+            }
             PasteGuard.PasteGuard.RegisterAction(warningAction);
         }
 
@@ -57,12 +56,12 @@ namespace ClipboardMonitor
             {
                 return CreatePanAlert(searchResult);
             }
-            return NoAlert;
+            return default;
         }
 
         private static Alert CreateAmsiAlert(string content)
         {
-            var processInfo = ProcessHelper.CaptureProcessInfo();
+            var processInfo = ProcessHelper.GetProcessSummary();
             var incidents = new StringBuilder(500);
 
             if (processInfo == default)
@@ -96,7 +95,7 @@ namespace ClipboardMonitor
         private static Alert CreatePanAlert(IReadOnlyList<SuspectedPANData> searchResult)
         {
 
-            var processInfo = ProcessHelper.CaptureProcessInfo();
+            var processInfo = ProcessHelper.GetProcessSummary();
             var incidents = new StringBuilder(500);
             if (processInfo == default)
             {

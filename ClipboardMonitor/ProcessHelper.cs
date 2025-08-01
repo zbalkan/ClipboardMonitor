@@ -22,7 +22,7 @@ namespace ClipboardMonitor
             return count > 1;
         }
 
-        public static ProcessInformation CaptureProcessInfo()
+        public static ProcessSummary GetProcessSummary()
         {
             try
             {
@@ -70,7 +70,7 @@ namespace ClipboardMonitor
                 var module = process.MainModule?.ModuleName ?? string.Empty;
 
                 // Create the struct that carries basic info
-                return new ProcessInformation
+                return new ProcessSummary
                 {
                     ProcessName = process.ProcessName,
                     ExecutablePath = executablePath,
@@ -81,13 +81,7 @@ namespace ClipboardMonitor
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
-                return new ProcessInformation()
-                {
-                    ExecutablePath = string.Empty,
-                    MainModuleName = string.Empty,
-                    ProcessName = string.Empty,
-                    WindowTitle = string.Empty
-                };
+                return default;
             }
         }
 

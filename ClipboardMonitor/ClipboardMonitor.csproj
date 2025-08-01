@@ -107,7 +107,7 @@
     <Compile Include="PaymentBrands\PaymentBrandBase.cs" />
     <Compile Include="PaymentBrands\Visa.cs" />
     <Compile Include="ProcessHelper.cs" />
-    <Compile Include="ProcessInformation.cs" />
+    <Compile Include="ProcessSummary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

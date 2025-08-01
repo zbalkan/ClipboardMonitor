@@ -18,13 +18,11 @@ namespace ClipboardMonitor
         /// <summary>
         ///     Shows a window, if none is already open.
         /// </summary>
-#pragma warning disable CA1822 // Mark members as static
         public ICommand AboutCommand => new DelegateCommand
         {
             CommandAction = () => new AboutWindow().Show(),
             CanExecuteFunc = () => GetChildWindows().All(aboutWindow => aboutWindow.GetType() != typeof(AboutWindow))
         };
-#pragma warning restore CA1822 // Mark members as static
 
         /// <summary>
         /// <para>This is required to get rid of the instances of Visual Studio debugging tool for XAML windows,

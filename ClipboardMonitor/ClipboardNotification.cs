@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ClipboardMonitor.AMSI;
-using ClipboardMonitor.PAN;
-using Hardcodet.Wpf.TaskbarNotification;
 
 namespace ClipboardMonitor
 {
@@ -18,9 +13,9 @@ namespace ClipboardMonitor
 
         private bool _disposedValue;
 
-        public ClipboardNotification(string warningText, TaskbarIcon icon)
+        public ClipboardNotification(string warningText)
         {
-            _notificationForm = new NotificationHandlerForm(warningText, icon);
+            _notificationForm = new NotificationHandlerForm(warningText);
         }
 
         public void Dispose()

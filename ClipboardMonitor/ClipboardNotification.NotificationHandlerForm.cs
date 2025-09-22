@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
-using Hardcodet.Wpf.TaskbarNotification;
+using Windows.UI.Notifications;
 
 namespace ClipboardMonitor
 {
@@ -9,14 +9,12 @@ namespace ClipboardMonitor
     {
         private sealed class NotificationHandlerForm : Form
         {
-            private readonly TaskbarIcon _notifyIcon;
             private readonly string _substituteText;
             private readonly Scanner _scanner;
 
-            public NotificationHandlerForm(string substituteText, TaskbarIcon icon)
+            public NotificationHandlerForm(string substituteText)
             {
                 _substituteText = substituteText;
-                _notifyIcon = icon;
                 _scanner = new Scanner();
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
@@ -51,13 +49,21 @@ namespace ClipboardMonitor
                         ClipboardHelper.SetText(_substituteText);
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";
                         Logger.Instance.LogWarning(logMessage, 20);
-                        _notifyIcon.ShowBalloonTip("Warning", alert.Title + "\n\nThe incident is logged.", BalloonIcon.Warning);
+                        SendNotification(alert.Title + "\n\nThe incident is logged.");
                     }
                 }
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
 
+            private void SendNotification(string message)
+            {
+                var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
+                var text = xml.GetElementsByTagName("text");
+                text[0].AppendChild(xml.CreateTextNode(message));
+                var toast = new ToastNotification(xml);
+                ToastNotificationManager.CreateToastNotifier("").Show(toast);
+            }
             protected override void Dispose(bool disposing)
             {
                 NativeMethods.RemoveClipboardFormatListener(Handle);

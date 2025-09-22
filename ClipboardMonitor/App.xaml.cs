@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using ClipboardMonitor.PAN;
 using ClipboardMonitor.PaymentBrands;
-using Hardcodet.Wpf.TaskbarNotification;
 
 namespace ClipboardMonitor
 {
@@ -16,7 +15,6 @@ namespace ClipboardMonitor
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private TaskbarIcon _notifyIcon;
         private ClipboardNotification _notification;
         private bool _disposedValue;
 
@@ -51,11 +49,7 @@ namespace ClipboardMonitor
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex());
 
-            // Create the notify icon (it's a resource declared in NotifyIconResources.xaml
-            // Finally, show the icon
-            _notifyIcon = FindTaskbarIcon();
-
-            _notification = new ClipboardNotification("REDACTED", _notifyIcon);
+           _notification = new ClipboardNotification("REDACTED");
 
             PasteGuard.PasteGuard.Install();
         }
@@ -198,22 +192,6 @@ namespace ClipboardMonitor
             }
         }
 
-        private TaskbarIcon FindTaskbarIcon()
-        {
-            TaskbarIcon icon;
-
-            try
-            {
-                icon = (TaskbarIcon)FindResource("NotifyIcon");
-            }
-            catch (ResourceReferenceKeyNotFoundException)
-            {
-                return null;
-            }
-
-            return icon;
-        }
-
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
@@ -241,7 +219,6 @@ namespace ClipboardMonitor
             {
                 ProcessHelper.Uncover();
                 _notification?.Dispose();
-                _notifyIcon?.Dispose(); //the icon would clean up automatically, but this is cleaner
             }
 
             _disposedValue = true;

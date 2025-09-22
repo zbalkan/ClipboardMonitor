@@ -24,7 +24,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>5</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseWinFormsOutOfProcDesigner>True</UseWinFormsOutOfProcDesigner>
     <Prefer32Bit>false</Prefer32Bit>
@@ -47,10 +47,17 @@
   <PropertyGroup>
     <StartupObject>ClipboardMonitor.App</StartupObject>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetPlatformVersion>10.0.26100</TargetPlatformVersion>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -61,6 +68,8 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
+    <Reference Include="Windows.Data" />
+    <Reference Include="Windows.UI" />
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -95,7 +104,6 @@
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="NotifyIconViewModel.cs" />
     <Compile Include="PANException.cs" />
     <Compile Include="PAN\Luhn.cs" />
     <Compile Include="PAN\PANData.cs" />
@@ -119,19 +127,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="NotifyIconResources.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\icon.ico" />
     <Resource Include="Assets\icon.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf">
-      <Version>2.0.1</Version>
-    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

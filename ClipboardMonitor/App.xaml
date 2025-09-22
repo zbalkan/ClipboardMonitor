@@ -5,11 +5,5 @@
              ShutdownMode="OnExplicitShutdown"
              SessionEnding="OnSessionEnding"
              Exit="OnExit">
-    <Application.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="NotifyIconResources.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </Application.Resources>
+
 </Application>

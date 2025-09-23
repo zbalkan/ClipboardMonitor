@@ -36,17 +36,15 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Null_Throws()
         {
-            PANHelper.Mask(null);
+            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(null));
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Empty_Throws()
         {
-            PANHelper.Mask(string.Empty);
+            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(string.Empty));
         }
     }
 }

@@ -50,6 +50,7 @@
     <Compile Include="AmExTests.cs" />
     <Compile Include="MastercardTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnionPayTests.cs" />
     <Compile Include="VisaTests.cs" />
   </ItemGroup>
   <ItemGroup>

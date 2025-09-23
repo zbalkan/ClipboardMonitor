@@ -1,5 +1,7 @@
 # ClipboardMonitor
 
+[![Build and Test](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml/badge.svg)](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml)
+
 ## Overview
 ClipboardMonitor is a lightweight background utility that tracks **clipboard** usage.
 It

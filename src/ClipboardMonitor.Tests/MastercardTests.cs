@@ -52,6 +52,7 @@ namespace ClipboardMonitor.Tests
             Assert.AreEqual("Mastercard", pan.PaymentBrand);
         }
 
+
         [TestMethod]
         public void Test_PAN_Invalid_Mastercard_WrongLength_Short()
         {

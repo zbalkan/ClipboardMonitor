@@ -45,7 +45,7 @@ namespace ClipboardMonitor
             if (IsCopiedFromBrowser())
             {
                 PasteGuard.PasteGuard.MarkRiskyBrowserCopy(content);
-                if (IsSuspicious(content) && _amsiSession.IsMalware(content, "Clipboard"))
+                if (IsSuspicious(content) || _amsiSession.IsMalware(content, "Clipboard"))
                 {
                     return CreateAmsiAlert(content);
                 }

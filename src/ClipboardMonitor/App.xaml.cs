@@ -48,7 +48,8 @@ namespace ClipboardMonitor
             // Configure PAN search configuration. You can add new card types by following the same steps
             PANData.Instance.AddPaymentBrand(new Mastercard())
                 .AddPaymentBrand(new Visa())
-                .AddPaymentBrand(new Amex());
+                .AddPaymentBrand(new Amex())
+                .AddPaymentBrand(new Discover());
 
             _notification = new ClipboardNotification("REDACTED");
 

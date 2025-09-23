@@ -32,12 +32,12 @@ jobs:
 
       # Restore NuGet packages
       - name: Restore NuGet packages
-        run: nuget restore ClipboardMonitor.sln
+        run: nuget restore src/ClipboardMonitor.sln
 
       # Build using MSBuild
       - name: Build with MSBuild
-        run: msbuild ClipboardMonitor.sln /t:Build /p:Configuration=Release
+        run: msbuild src/ClipboardMonitor.sln /t:Build /p:Configuration=Release
 
       # Run unit tests
       - name: Run tests
-        run: vstest.console.exe ClipboardMonitor.Tests\bin\Release\ClipboardMonitor.Tests.dll
+        run: vstest.console.exe src\ClipboardMonitor.Tests\bin\Release\ClipboardMonitor.Tests.dll

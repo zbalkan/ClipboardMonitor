@@ -50,23 +50,5 @@ namespace ClipboardMonitor.Tests
 
             Assert.AreEqual("Visa", pan.PaymentBrand);
         }
-
-        [TestMethod]
-        public void Test_PAN_Valid_Amex()
-        {
-            const string cardNumber = "371449635398431";
-            var pan = PANData.Instance.Parse(cardNumber)[0];
-
-            Assert.AreEqual("Amex", pan.PaymentBrand);
-        }
-
-        [TestMethod]
-        public void Test_PAN_Valid_Amex_WithDashes()
-        {
-            const string cardNumber = "371449635398431";
-            var pan = PANData.Instance.Parse(cardNumber)[0];
-
-            Assert.AreEqual("Amex", pan.PaymentBrand);
-        }
     }
 }

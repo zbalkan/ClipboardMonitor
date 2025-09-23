@@ -1,0 +1,43 @@
+name: .NET Framework Build and Test
+
+on:
+  push:
+    branches: [ "master" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.ico'
+  pull_request:
+    branches: [ "master" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.ico'
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Add Visual Studio environment setup
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Setup VSTest
+        uses: darenm/Setup-VSTest@v1
+
+      # Restore NuGet packages
+      - name: Restore NuGet packages
+        run: nuget restore src/ClipboardMonitor.sln
+
+      # Build using MSBuild
+      - name: Build with MSBuild
+        run: msbuild src/ClipboardMonitor.sln /t:Build /p:Configuration=Release
+
+      # Run unit tests
+      - name: Run tests
+        run: vstest.console.exe src\ClipboardMonitor.Tests\bin\Release\ClipboardMonitor.Tests.dll

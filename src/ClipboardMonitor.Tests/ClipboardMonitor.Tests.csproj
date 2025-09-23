@@ -45,7 +45,7 @@
     <Compile Include="AmsiTests.cs" />
     <Compile Include="LuhnTests.cs" />
     <Compile Include="AmExTests.cs" />
-    <Compile Include="PANTests.cs" />
+    <Compile Include="MastercardTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="VisaTests.cs" />
   </ItemGroup>

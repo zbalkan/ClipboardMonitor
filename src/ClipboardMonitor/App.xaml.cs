@@ -45,15 +45,6 @@ namespace ClipboardMonitor
 
             Logger.Instance.LogInfo("Started a new ClipboardMonitor instance.", 10);
 
-            // Configure PAN search configuration. You can add new card types by following the same steps
-            PANData.Instance.AddPaymentBrand(new Mastercard())
-                .AddPaymentBrand(new Visa())
-                .AddPaymentBrand(new Amex())
-                .AddPaymentBrand(new Discover())
-                .AddPaymentBrand(new Jcb())
-                .AddPaymentBrand(new DinersClub())
-                .AddPaymentBrand(new UnionPay());
-
             _notification = new ClipboardNotification("REDACTED");
 
             PasteGuard.PasteGuard.Install();

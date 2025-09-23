@@ -89,6 +89,6 @@ namespace ClipboardMonitor.PasteGuard
 
         private static bool WinHeld() => (NativeMethods.GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
 
-        private static string MaskPayload(string payload) => PANData.Instance.Sanitize(payload);
+        private static string MaskPayload(string payload) => PANHelper.Mask(payload);
     }
 }

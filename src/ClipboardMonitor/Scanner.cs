@@ -51,7 +51,7 @@ namespace ClipboardMonitor
                 }
             }
 
-            var searchResult = PANData.Instance.Parse(content);
+            var searchResult = PANHelper.Parse(content);
             if (IncludesPANData(searchResult))
             {
                 return CreatePanAlert(searchResult);

@@ -8,17 +8,11 @@ namespace ClipboardMonitor.Tests
     [TestClass]
     public class MaskingTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            PANData.Instance.AddPaymentBrand(new Visa());
-        }
-
         [TestMethod]
         public void Test_Mask_FullDigits()
         {
             const string input = "4012888888881881";
-            var masked = PANData.Instance.Sanitize(input);
+            var masked = PANHelper.Mask(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
@@ -27,7 +21,7 @@ namespace ClipboardMonitor.Tests
         public void Test_Mask_WithSpaces()
         {
             const string input = "4012 8888 8888 1881";
-            var masked = PANData.Instance.Sanitize(input);
+            var masked = PANHelper.Mask(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
@@ -36,7 +30,7 @@ namespace ClipboardMonitor.Tests
         public void Test_Mask_WithDashes()
         {
             const string input = "4012-8888-8888-1881";
-            var masked = PANData.Instance.Sanitize(input);
+            var masked = PANHelper.Mask(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
@@ -45,15 +39,14 @@ namespace ClipboardMonitor.Tests
         [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Null_Throws()
         {
-            PANData.Instance.Sanitize(null);
+            PANHelper.Mask(null);
         }
 
         [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Empty_Throws()
         {
-            PANData.Instance.Sanitize(string.Empty);
+            PANHelper.Mask(string.Empty);
         }
     }
-
 }

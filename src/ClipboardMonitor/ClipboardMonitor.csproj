@@ -92,6 +92,7 @@
     <Compile Include="ClipboardNotification.NotificationHandlerForm.cs" />
     <Compile Include="Helpers\AppIdHelper.cs" />
     <Compile Include="Helpers\DarkModeHelper.cs" />
+    <Compile Include="PAN\PANHelper.cs" />
     <Compile Include="PasteGuard\NativeMethods.cs" />
     <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="PaymentBrands\DinersClub.cs" />
@@ -108,7 +109,7 @@
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="PANException.cs" />
     <Compile Include="PAN\Luhn.cs" />
-    <Compile Include="PAN\PANData.cs" />
+    <Compile Include="PAN\PaymentBrandRegistry.cs" />
     <Compile Include="PAN\SuspectedPANData.cs" />
     <Compile Include="PaymentBrands\Amex.cs" />
     <Compile Include="PaymentBrands\IPaymentBrand.cs" />

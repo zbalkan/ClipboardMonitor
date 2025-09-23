@@ -7,7 +7,7 @@ namespace ClipboardMonitor.PaymentBrands
         private const string _brand = "Maestro";
 
         private readonly Regex _pattern = new Regex(
-            @"(?:\D|^)((?:5018|5020|5038|5893|6304|6759|6761|6762|6763)(?:[ \-]?[0-9]){8,15})(?:\D|$)",
+            @"(?:\D|^)((?:5[0678]\d\d|6304|67\d\d)(?:[ \-]?\d){8,15})(?:\D|$)",
             RegexOptions.Compiled);
 
         public override Regex GetPattern() => _pattern;

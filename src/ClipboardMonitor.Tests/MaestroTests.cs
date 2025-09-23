@@ -89,6 +89,15 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
+        public void Test_PAN_Valid_Maestro_6771()
+        {
+            const string cardNumber = "6771798021000016";
+            var pan = PANHelper.Parse(cardNumber)[0];
+
+            Assert.AreEqual("Maestro", pan.PaymentBrand);
+        }
+
+        [TestMethod]
         public void Test_PAN_Valid_Maestro_6761_WithSpaces()
         {
             const string cardNumber = "6761 5897 7391 4468";
@@ -114,6 +123,8 @@ namespace ClipboardMonitor.Tests
 
             Assert.AreEqual("Maestro", pan.PaymentBrand);
         }
+
+        // ❌ Invalid Maestro PANs
 
         [TestMethod]
         public void Test_PAN_Invalid_Maestro_WrongPrefix()

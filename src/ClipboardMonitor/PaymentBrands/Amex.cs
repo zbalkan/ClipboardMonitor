@@ -5,7 +5,7 @@ namespace ClipboardMonitor.PaymentBrands
     public class Amex : PaymentBrandBase, IPaymentBrand
     {
         private const string _brand = "Amex";
-        private readonly Regex _pattern = new Regex(@"(?:\D|^)((?:34|37)[0-9]{2}(?:\ |\-|)[0-9]{6}(?:\ |\-|)[0-9]{5})(?:\D|$)", RegexOptions.Compiled);
+        private readonly Regex _pattern = new Regex(@"(?:\D|^)((?:3[47][0-9]{2})(?:[ \-]?)[0-9]{6}(?:[ \-]?)[0-9]{5})(?:\D|$)", RegexOptions.Compiled);
 
         public override Regex GetPattern() => _pattern;
 

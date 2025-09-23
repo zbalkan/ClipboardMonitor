@@ -36,8 +36,8 @@ ClipboardMonitor itself runs fine under a standard user account.
 An optional `ENABLE_CRITICAL_PROCESS` block (currently **commented-out** for safety) can mark the process as critical; if re-enabled and the process is forcibly terminated, Windows will bug-check with **CRITICAL_PROCESS_DIED**. Enable only in hardened production builds—**never during normal development**.
 
 ## Development
-The application s built with **.NET Framework 4.8.1** and WPF/C# 7.x and using Winforms components when needed.
-Test project uses .NET 9.0.
+The application and test projects are built with **.NET Framework 4.8.1** and WPF/C# 7.x and using Winforms components when needed.
+
 Open the solution in Visual Studio (with *.NET Desktop Development* workload).
 
 ## Thanks

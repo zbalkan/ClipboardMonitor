@@ -52,11 +52,7 @@ namespace ClipboardMonitor
             }
 
             var searchResult = PANHelper.Parse(content);
-            if (IncludesPANData(searchResult))
-            {
-                return CreatePanAlert(searchResult);
-            }
-            return default;
+            return searchResult == null || searchResult.Count == 0 ? default : CreatePanAlert(searchResult);
         }
 
         private static Alert CreateAmsiAlert(string content)
@@ -132,8 +128,6 @@ namespace ClipboardMonitor
                 Payload = string.Join(", ", searchResult.Select(sr => sr.ToString()).ToArray())
             };
         }
-
-        private static bool IncludesPANData(IReadOnlyList<SuspectedPANData> searchResult) => searchResult != null && searchResult.Count != 0;
 
         private static bool IsCopiedFromBrowser()
         {

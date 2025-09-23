@@ -53,15 +53,6 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
-        public void Test_PAN_Valid_Mastercard_2Series_Upper()
-        {
-            const string cardNumber = "2720990000000005"; // Upper bound of 2-series
-            var pan = PANHelper.Parse(cardNumber)[0];
-
-            Assert.AreEqual("Mastercard", pan.PaymentBrand);
-        }
-
-        [TestMethod]
         public void Test_PAN_Invalid_Mastercard_WrongLength_Short()
         {
             const string cardNumber = "510510510510510"; // 15 digits

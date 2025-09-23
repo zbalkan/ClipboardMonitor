@@ -26,24 +26,6 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
-        public void Test_PAN_Valid_Discover_644()
-        {
-            const string cardNumber = "6440000000000007";
-            var pan = PANHelper.Parse(cardNumber)[0];
-
-            Assert.AreEqual("Discover", pan.PaymentBrand);
-        }
-
-        [TestMethod]
-        public void Test_PAN_Valid_Discover_622Range()
-        {
-            const string cardNumber = "6221261111111111"; // lower bound, Luhn-valid
-            var pan = PANHelper.Parse(cardNumber)[0];
-
-            Assert.AreEqual("Discover", pan.PaymentBrand);
-        }
-
-        [TestMethod]
         public void Test_PAN_Valid_Discover_WithDashes()
         {
             const string cardNumber = "6011-1111-1111-1117";

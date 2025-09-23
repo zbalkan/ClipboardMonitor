@@ -6,7 +6,7 @@ namespace ClipboardMonitor.PaymentBrands
     public interface IPaymentBrand
     {
         Regex GetPattern();
-        IReadOnlyList<string> Parse(string text);
+        IReadOnlyList<string> Matches(string text);
         string ToString();
         bool Validate(string cardNumber);
     }

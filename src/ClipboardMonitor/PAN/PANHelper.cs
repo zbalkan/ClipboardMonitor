@@ -65,15 +65,29 @@ namespace ClipboardMonitor.PAN
                 throw new PANException("No payment brand is defined.");
             }
 
-            return brands
-                .SelectMany(b => b.Parse(text)
-                    .Select(p => new SuspectedPANData
+            var result = new List<SuspectedPANData>();
+
+            foreach (var brand in brands)
+            {
+                var brandMatches = brand.Matches(text);
+
+                foreach (var match in brandMatches)
+                {
+                    if (Luhn.Validate(match))
                     {
-                        MaskedPAN = MaskPan(p),
-                        PaymentBrand = b.ToString()
-                    }))
-                .ToList()
-                .AsReadOnly();
+                        var suspected = new SuspectedPANData
+                        {
+                            MaskedPAN = MaskPan(match),
+                            PaymentBrand = brand.ToString()
+                        };
+
+                        result.Add(suspected);
+                    }
+                }
+            }
+
+            return result.AsReadOnly();
+
         }
 
         /// <summary>
@@ -105,7 +119,7 @@ namespace ClipboardMonitor.PAN
                 throw new PANException("No payment brand is defined.");
             }
 
-            var matches = brands.SelectMany(b => b.Parse(text)).Distinct();
+            var matches = brands.SelectMany(b => b.Matches(text)).Distinct();
             var sanitized = text;
 
             foreach (var match in matches)

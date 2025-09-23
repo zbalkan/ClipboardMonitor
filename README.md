@@ -12,6 +12,8 @@ It
 * logs every incident asynchronously to the Windows Event Log.
 * uses a toast notification to inform the user.
 
+![Two use cases of ClipboardMonitor: PAN detection, and Malware detection in clipboard](/screenshot.png)
+
 ## Installation
 Logs are written to the Windows Event Log. Creating (or removing) the log source requires elevation.
 
@@ -42,8 +44,11 @@ The application and test projects are built with **.NET Framework 4.8.1** and WP
 
 Open the solution in Visual Studio (with *.NET Desktop Development* workload).
 
-## Thanks
-Thanks to **Gérald Barré, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm) and **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
+## Acknowledgement
+I'd like to present my gratitute to;
+* **Tim MalcomVetter** for the [UnstoppableService](https://github.com/malcomvetter/UnstoppableService) that provides a single-executable Windows service with installer capability, similar to Sysmon.
+* **Gérald Barré, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
+* **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
 
 ## Icon
 [Monitoring icons created by smashingstocks - Flaticon](https://www.flaticon.com/free-icons/monitoring)

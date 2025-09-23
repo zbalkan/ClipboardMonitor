@@ -100,11 +100,11 @@
     <Compile Include="Scanner.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClipboardHelper.cs" />
+    <Compile Include="Helpers\ClipboardHelper.cs" />
     <Compile Include="ClipboardNotification.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="PANException.cs" />
     <Compile Include="PAN\Luhn.cs" />
     <Compile Include="PAN\PANData.cs" />
@@ -114,7 +114,7 @@
     <Compile Include="PaymentBrands\Mastercard.cs" />
     <Compile Include="PaymentBrands\PaymentBrandBase.cs" />
     <Compile Include="PaymentBrands\Visa.cs" />
-    <Compile Include="ProcessHelper.cs" />
+    <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="ProcessSummary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

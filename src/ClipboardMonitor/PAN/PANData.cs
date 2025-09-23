@@ -69,22 +69,17 @@ namespace ClipboardMonitor.PAN
                 throw new ArgumentException($"'{nameof(text)}' cannot be null or empty.", nameof(text));
             }
 
-            var matches = new List<string>();
-
             // Collect all PAN matches from all brands
-            foreach (var brand in _paymentBrands)
-            {
-                matches.AddRange(brand.Parse(text));
-            }
+            var matches = _paymentBrands.SelectMany(b => b.Parse(text));
 
-            if (matches.Count == 0)
+            if (!matches.Any())
             {
                 return text; // nothing to sanitize
             }
 
             // Deduplicate and replace in order
             var sanitized = text;
-            foreach (var match in matches.Distinct())
+            foreach (var match in matches)
             {
                 sanitized = sanitized.Replace(match, Mask(GetOnlyNumbers(match)));
             }

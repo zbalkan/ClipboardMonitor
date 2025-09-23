@@ -9,7 +9,7 @@ namespace ClipboardMonitor.PAN
     {
         private readonly List<IPaymentBrand> _paymentBrands;
 
-        private const int MinimumPANLength = 15;
+        private const int MinimumPANLength = 13;
 
         private static readonly Lazy<PANData> LazyInstance = new Lazy<PANData>(() => new PANData());
 

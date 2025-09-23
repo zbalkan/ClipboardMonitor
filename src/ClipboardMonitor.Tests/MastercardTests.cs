@@ -88,7 +88,7 @@ namespace ClipboardMonitor.Tests
         [TestMethod]
         public void Test_PAN_Invalid_Mastercard_WrongPrefix()
         {
-            const string cardNumber = "6011111111111117"; // Discover
+            const string cardNumber = "9911111111111111"; // Invalid for any brand
             var result = PANData.Instance.Parse(cardNumber);
 
             Assert.IsEmpty(result);

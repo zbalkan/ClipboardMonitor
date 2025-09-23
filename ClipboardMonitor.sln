@@ -5,13 +5,13 @@ VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardMonitor", "ClipboardMonitor\ClipboardMonitor.csproj", "{7DA2F416-C0A8-4517-8AE6-AA1BF88FCBDC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardMonitor.Tests", "ClipboardMonitor.Tests\ClipboardMonitor.Tests.csproj", "{E7263265-0E80-44BC-9532-31B91F986BB6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7C65E069-0DA3-409B-B781-4D493206B93C}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClipboardMonitor.Tests", "ClipboardMonitor.Tests\ClipboardMonitor.Tests.csproj", "{C65E9898-A115-4310-9979-23A18A849721}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{7DA2F416-C0A8-4517-8AE6-AA1BF88FCBDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7DA2F416-C0A8-4517-8AE6-AA1BF88FCBDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7DA2F416-C0A8-4517-8AE6-AA1BF88FCBDC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E7263265-0E80-44BC-9532-31B91F986BB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E7263265-0E80-44BC-9532-31B91F986BB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E7263265-0E80-44BC-9532-31B91F986BB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E7263265-0E80-44BC-9532-31B91F986BB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C65E9898-A115-4310-9979-23A18A849721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C65E9898-A115-4310-9979-23A18A849721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C65E9898-A115-4310-9979-23A18A849721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C65E9898-A115-4310-9979-23A18A849721}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -50,7 +50,8 @@ namespace ClipboardMonitor
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex())
                 .AddPaymentBrand(new Discover())
-                .AddPaymentBrand(new Jcb());
+                .AddPaymentBrand(new Jcb())
+                .AddPaymentBrand(new DinersClub());
 
             _notification = new ClipboardNotification("REDACTED");
 

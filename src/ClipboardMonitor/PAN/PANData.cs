@@ -51,7 +51,7 @@ namespace ClipboardMonitor.PAN
 
                 var brandName = brand.ToString();
 
-                list.AddRange(result.Select(p => new SuspectedPANData { MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brandName }));
+                list.AddRange(result.Select(p => new SuspectedPANData { MaskedPAN = Sanitize(p), PaymentBrand = brandName }));
             }
 
             return list.AsReadOnly();
@@ -69,24 +69,27 @@ namespace ClipboardMonitor.PAN
                 throw new ArgumentException($"'{nameof(text)}' cannot be null or empty.", nameof(text));
             }
 
-            var newText = string.Copy(text);
+            var matches = new List<string>();
 
-            foreach (var brand in _paymentBrands) // O(m*n)
+            // Collect all PAN matches from all brands
+            foreach (var brand in _paymentBrands)
             {
-                var result = brand.Parse(text);
-                if (result.Count == 0)
-                {
-                    continue;
-                }
-
-                foreach (var r in result)
-                {
-                    newText.Replace(r, Mask(GetOnlyNumbers(r)));
-                }
-
+                matches.AddRange(brand.Parse(text));
             }
 
-            return newText;
+            if (matches.Count == 0)
+            {
+                return text; // nothing to sanitize
+            }
+
+            // Deduplicate and replace in order
+            var sanitized = text;
+            foreach (var match in matches.Distinct())
+            {
+                sanitized = sanitized.Replace(match, Mask(GetOnlyNumbers(match)));
+            }
+
+            return sanitized;
         }
 
         /// <summary>
@@ -108,7 +111,7 @@ namespace ClipboardMonitor.PAN
 
             var first = cardNumber.Substring(0, 6);
             var middle = cardNumber.Substring(6, cardNumber.Length - 10);
-            var last = cardNumber.Substring(cardNumber.Length - 5, 4);
+            var last = cardNumber.Substring(cardNumber.Length - 4, 4);
 
             var maskedArray = new char[middle.Length];
 

@@ -1,7 +1,6 @@
 name: .NET Framework Build and Test
 
 on:
-on:
   push:
     branches: [ "master" ]
     paths-ignore:

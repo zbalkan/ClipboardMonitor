@@ -49,7 +49,8 @@ namespace ClipboardMonitor
             PANData.Instance.AddPaymentBrand(new Mastercard())
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex())
-                .AddPaymentBrand(new Discover());
+                .AddPaymentBrand(new Discover())
+                .AddPaymentBrand(new Jcb());
 
             _notification = new ClipboardNotification("REDACTED");
 

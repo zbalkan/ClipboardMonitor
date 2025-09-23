@@ -95,6 +95,7 @@
     <Compile Include="PasteGuard\NativeMethods.cs" />
     <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="PaymentBrands\Discover.cs" />
+    <Compile Include="PaymentBrands\Jcb.cs" />
     <Compile Include="Scanner.cs" />
   </ItemGroup>
   <ItemGroup>

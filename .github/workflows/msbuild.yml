@@ -1,10 +1,19 @@
 name: .NET Framework Build and Test
 
 on:
+on:
   push:
     branches: [ "master" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.ico'
   pull_request:
     branches: [ "master" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.png'
+      - '**/*.ico'
   workflow_dispatch:
 
 

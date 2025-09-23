@@ -48,6 +48,7 @@
     <Compile Include="JcbTests.cs" />
     <Compile Include="LuhnTests.cs" />
     <Compile Include="AmExTests.cs" />
+    <Compile Include="MaestroTests.cs" />
     <Compile Include="MaskingTests.cs" />
     <Compile Include="MastercardTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

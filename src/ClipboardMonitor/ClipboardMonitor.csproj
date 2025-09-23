@@ -98,6 +98,7 @@
     <Compile Include="PaymentBrands\DinersClub.cs" />
     <Compile Include="PaymentBrands\Discover.cs" />
     <Compile Include="PaymentBrands\Jcb.cs" />
+    <Compile Include="PaymentBrands\Maestro.cs" />
     <Compile Include="PaymentBrands\UnionPay.cs" />
     <Compile Include="Scanner.cs" />
   </ItemGroup>

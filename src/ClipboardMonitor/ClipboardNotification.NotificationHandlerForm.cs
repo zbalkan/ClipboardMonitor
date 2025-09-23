@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 using Windows.UI.Notifications;
 
@@ -9,12 +10,15 @@ namespace ClipboardMonitor
     {
         private sealed class NotificationHandlerForm : Form
         {
-            private readonly string _substituteText;
             private readonly Scanner _scanner;
+            private readonly string _substituteText;
+            private static string _appId;
 
-            public NotificationHandlerForm(string substituteText)
+
+            public NotificationHandlerForm(string substituteText, string appId)
             {
                 _substituteText = substituteText;
+                _appId = appId;
                 _scanner = new Scanner();
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
@@ -22,6 +26,26 @@ namespace ClipboardMonitor
 
                 //Place window in the system-maintained clipboard format listener list
                 NativeMethods.AddClipboardFormatListener(Handle);
+            }
+
+            public static void SendNotification(string message)
+            {
+                var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastImageAndText01);
+                var textNodes = xml.GetElementsByTagName("text");
+                textNodes[0].InnerText = message;
+                var iconNodes = xml.GetElementsByTagName("image");
+                string iconPath = null;
+                if (DarkModeHelper.IsDarkModeEnabled())
+                {
+                    iconPath = Path.GetFullPath("Assets/icon-inverted.png");
+                }
+                else
+                {
+                    iconPath = Path.GetFullPath("Assets/icon.png");
+                }
+                iconNodes[0].Attributes.GetNamedItem("src").NodeValue = iconPath;
+                var toast = new ToastNotification(xml);
+                ToastNotificationManager.CreateToastNotifier(_appId).Show(toast);
             }
 
             protected override void WndProc(ref Message m)
@@ -55,21 +79,15 @@ namespace ClipboardMonitor
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
-
-            private void SendNotification(string message)
-            {
-                var xml = ToastNotificationManager.GetTemplateContent(ToastTemplateType.ToastText01);
-                var text = xml.GetElementsByTagName("text");
-                text[0].AppendChild(xml.CreateTextNode(message));
-                var toast = new ToastNotification(xml);
-                ToastNotificationManager.CreateToastNotifier("").Show(toast);
-            }
+            #region Dispose
             protected override void Dispose(bool disposing)
             {
                 NativeMethods.RemoveClipboardFormatListener(Handle);
                 _scanner.Dispose();
                 base.Dispose(disposing);
             }
+
+            #endregion Dispose
         }
     }
 }

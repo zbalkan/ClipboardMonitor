@@ -58,5 +58,10 @@ namespace ClipboardMonitor
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
         #endregion user32.dll
+
+        #region shell32.dll
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern int SetCurrentProcessExplicitAppUserModelID(string appID);
+        #endregion shell32.dll
     }
 }

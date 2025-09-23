@@ -18,6 +18,7 @@ namespace ClipboardMonitor
         private ClipboardNotification _notification;
         private bool _disposedValue;
 
+
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -49,7 +50,7 @@ namespace ClipboardMonitor
                 .AddPaymentBrand(new Visa())
                 .AddPaymentBrand(new Amex());
 
-           _notification = new ClipboardNotification("REDACTED");
+            _notification = new ClipboardNotification("REDACTED");
 
             PasteGuard.PasteGuard.Install();
         }

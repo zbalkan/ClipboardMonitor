@@ -93,6 +93,8 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ClipboardNotification.NotificationHandlerForm.cs" />
+    <Compile Include="Helpers\AppIdHelper.cs" />
+    <Compile Include="Helpers\DarkModeHelper.cs" />
     <Compile Include="PasteGuard\NativeMethods.cs" />
     <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="Scanner.cs" />
@@ -129,7 +131,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Assets\icon.ico" />
-    <Resource Include="Assets\icon.png" />
+    <Content Include="Assets\icon-inverted.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\icon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

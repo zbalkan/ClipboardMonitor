@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("ClipboardMonitor")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Zafer Balkan")]
 [assembly: AssemblyProduct("ClipboardMonitor")]
 [assembly: AssemblyCopyright("Copyright ©  2025")]
 [assembly: AssemblyTrademark("")]

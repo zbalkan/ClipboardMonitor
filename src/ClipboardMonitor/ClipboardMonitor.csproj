@@ -94,7 +94,7 @@
     <Compile Include="Helpers\AppIdHelper.cs" />
     <Compile Include="Helpers\DarkModeHelper.cs" />
     <Compile Include="PAN\PANHelper.cs" />
-    <Compile Include="PasteGuard\PasteGuard.cs" />
+    <Compile Include="PasteGuard.cs" />
     <Compile Include="PaymentBrands\DinersClub.cs" />
     <Compile Include="PaymentBrands\Discover.cs" />
     <Compile Include="PaymentBrands\Jcb.cs" />

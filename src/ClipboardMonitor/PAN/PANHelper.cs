@@ -18,7 +18,7 @@ namespace ClipboardMonitor.PAN
     /// It offers two main functions:
     /// <list type="bullet">
     /// <item><description>
-    /// <see cref="Parse"/> – extract suspected PANs, mask them, and return them
+    /// <see cref="TryParse"/> – extract suspected PANs, mask them, and return them
     /// with associated payment brand information.
     /// </description></item>
     /// <item><description>
@@ -52,20 +52,22 @@ namespace ClipboardMonitor.PAN
         /// Thrown when no payment brands are registered in
         /// <see cref="PaymentBrandRegistry"/>.
         /// </exception>
-        public static IReadOnlyList<SuspectedPANData> Parse(string text)
+        public static bool TryParse(string text, out IReadOnlyList<SuspectedPANData> suspectedPANs)
         {
+            var result = new List<SuspectedPANData>();
+            suspectedPANs = result.AsReadOnly();
+
             if (string.IsNullOrEmpty(text))
             {
-                throw new ArgumentException("Text cannot be null or empty.", nameof(text));
+                return false;
             }
 
             var brands = PaymentBrandRegistry.Instance.Brands;
             if (brands.Count == 0)
             {
-                throw new PANException("No payment brand is defined.");
-            }
+                return false;
 
-            var result = new List<SuspectedPANData>();
+            }
 
             foreach (var brand in brands)
             {
@@ -86,8 +88,8 @@ namespace ClipboardMonitor.PAN
                 }
             }
 
-            return result.AsReadOnly();
-
+            suspectedPANs = result.AsReadOnly();
+            return true;
         }
 
         /// <summary>

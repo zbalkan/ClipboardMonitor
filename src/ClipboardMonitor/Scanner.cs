@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using ClipboardMonitor.AMSI;
 using ClipboardMonitor.PAN;
 
@@ -33,14 +31,17 @@ namespace ClipboardMonitor
                 {
                     return CreateSuspiciousActivityAlert(processSummary, content);
                 }
-
             }
             if (_amsiSession.IsMalware(content, "Clipboard"))
             {
                 return CreateMalwareAlert(processSummary, content);
             }
-            var searchResult = PANHelper.Parse(content);
-            return searchResult == null || searchResult.Count == 0 ? default : CreatePanAlert(processSummary, searchResult);
+            if (PANHelper.TryParse(content, out var searchResult))
+            {
+                return CreatePanAlert(processSummary, searchResult);
+            }
+
+            return default;
         }
 
         private static Alert CreateMalwareAlert(ProcessSummary processSummary, string content)

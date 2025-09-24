@@ -178,7 +178,7 @@ namespace ClipboardMonitor
         private static void WarningAction(ProcessSummary processSummary, string content)
         {
             Task.Run(() =>
-                MessageBox.Show($"Pasting web content into the Run dialog is dangerous. Use extreme caution.\n\n{content}",
+                MessageBox.Show($"Do not paste web content into the Run dialog unless you fully trust the source.\nCopied content:\n\n{content}",
                                 "Danger!",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning,

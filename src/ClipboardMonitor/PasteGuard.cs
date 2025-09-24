@@ -10,7 +10,7 @@ namespace ClipboardMonitor.PasteGuard
     internal static class PasteGuard
     {
         private const int LAST_N_SECONDS = 30;
-        private static readonly Helpers.NativeMethods.WinEventDelegate _winEventProc = WinEventCallback;
+        private static readonly NativeMethods.WinEventDelegate _winEventProc = WinEventCallback;
         private static readonly TimeSpan Window = TimeSpan.FromSeconds(LAST_N_SECONDS);
 
         private static IntPtr _lastRunDialog = IntPtr.Zero;
@@ -26,8 +26,8 @@ namespace ClipboardMonitor.PasteGuard
         {
             if (_winEventHookForeground == IntPtr.Zero)
             {
-                _winEventHookForeground = Helpers.NativeMethods.SetWinEventHook(Helpers.NativeMethods.EVENT_SYSTEM_FOREGROUND, Helpers.NativeMethods.EVENT_SYSTEM_FOREGROUND,
-                    IntPtr.Zero, _winEventProc, 0, 0, Helpers.NativeMethods.WINEVENT_OUTOFCONTEXT);
+                _winEventHookForeground = NativeMethods.SetWinEventHook(NativeMethods.EVENT_SYSTEM_FOREGROUND, NativeMethods.EVENT_SYSTEM_FOREGROUND,
+                    IntPtr.Zero, _winEventProc, 0, 0, NativeMethods.WINEVENT_OUTOFCONTEXT);
             }
         }
 
@@ -38,7 +38,7 @@ namespace ClipboardMonitor.PasteGuard
         {
             if (_winEventHookForeground != IntPtr.Zero)
             {
-                Helpers.NativeMethods.UnhookWinEvent(_winEventHookForeground);
+                NativeMethods.UnhookWinEvent(_winEventHookForeground);
                 _winEventHookForeground = IntPtr.Zero;
             }
         }
@@ -54,7 +54,7 @@ namespace ClipboardMonitor.PasteGuard
         private static string GetClassName(IntPtr hWnd)
         {
             var sb = new StringBuilder(256);
-            Helpers.NativeMethods.GetClassName(hWnd, sb, sb.Capacity);
+            NativeMethods.GetClassName(hWnd, sb, sb.Capacity);
             return sb.ToString();
         }
 
@@ -80,7 +80,7 @@ namespace ClipboardMonitor.PasteGuard
             var cls = GetClassName(hwnd);
             if (cls == "#32770")
             {
-                Helpers.NativeMethods.GetWindowThreadProcessId(hwnd, out var pid);
+                NativeMethods.GetWindowThreadProcessId(hwnd, out var pid);
                 try
                 {
                     using (var proc = Process.GetProcessById((int)pid))

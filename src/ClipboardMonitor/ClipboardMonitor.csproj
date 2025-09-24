@@ -80,7 +80,6 @@
     </ApplicationDefinition>
     <Compile Include="AhoCorasickTree.cs" />
     <Compile Include="Alert.cs" />
-    <Compile Include="AMSI\NativeMethods.cs" />
     <Compile Include="AMSI\AmsiContext.cs" />
     <Compile Include="AMSI\AmsiContextSafeHandle.cs" />
     <Compile Include="AMSI\AmsiResult.cs" />
@@ -108,7 +107,7 @@
     <Compile Include="ClipboardNotification.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Helpers\NativeMethods.cs" />
+    <Compile Include="NativeMethods.cs" />
     <Compile Include="PANException.cs" />
     <Compile Include="PAN\Luhn.cs" />
     <Compile Include="PAN\PaymentBrandRegistry.cs" />

@@ -17,13 +17,11 @@ namespace ClipboardMonitor
         public static void NotifyPasteGuard(ProcessSummary processSummary, string content)
         {
             var masked =
-                content.Length > 200 ? MaskPayload(content.Substring(0, 200)) : MaskPayload(content);
+                content.Length > 200 ? PANHelper.Mask(content.Substring(0, 200)) : PANHelper.Mask(content);
             PasteGuard.SetSuspiciousActivityContent(processSummary, masked);
         }
 
         public void Dispose() => PasteGuard.Remove();
-
-        private static string MaskPayload(string payload) => PANHelper.Mask(payload);
 
         private void WarningAction(ProcessSummary processSummary, string content)
         {

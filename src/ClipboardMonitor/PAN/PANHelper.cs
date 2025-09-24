@@ -89,7 +89,7 @@ namespace ClipboardMonitor.PAN
             }
 
             suspectedPANs = result.AsReadOnly();
-            return true;
+            return result.Count > 0;
         }
 
         /// <summary>

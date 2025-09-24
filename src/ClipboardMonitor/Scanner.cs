@@ -177,15 +177,6 @@ namespace ClipboardMonitor
 
         private static void WarningAction(ProcessSummary processSummary, string content)
         {
-            Task.Run(() =>
-                MessageBox.Show($"Do not paste web content into the Run dialog unless you fully trust the source.\nCopied content:\n\n{content}",
-                                "Danger!",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning,
-                                MessageBoxDefaultButton.Button1,
-                                MessageBoxOptions.ServiceNotification)
-            );
-
             var incidents = new StringBuilder(500);
             incidents.AppendLine("Detected Run dialog following suspicious text copied from browser.");
             if (processSummary == default)
@@ -202,11 +193,32 @@ namespace ClipboardMonitor
                 .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
                 .Append("Source process name: ").AppendLine(processSummary.ProcessName)
                 .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                .Append("Suspicious content: ").AppendLine(content)
+                .AppendLine("Suspicious content: ")
+                .AppendLine("----------") // Used as delimiter
+                .AppendLine(content)
                 .AppendLine("----------") // Used as delimiter
                 .AppendLine();
             }
             Logger.Instance.LogWarning(incidents.ToString(), 21);
+
+            var message = new StringBuilder(500);
+            message.AppendLine("Do not paste web content into the Run dialog unless you fully trust the source.\n")
+                .Append("Source process name: ").AppendLine(processSummary.ProcessName)
+                .AppendLine("Suspicious content: ")
+                .AppendLine("----------") // Used as delimiter
+                .AppendLine(content)
+                .AppendLine("----------") // Used as delimiter
+                .AppendLine();
+
+
+            Task.Run(() =>
+                MessageBox.Show(message.ToString(),
+                                "Detected Run dialog following suspicious text copied from browser.",
+                                MessageBoxButtons.OK,
+                                MessageBoxIcon.Warning,
+                                MessageBoxDefaultButton.Button1,
+                                MessageBoxOptions.ServiceNotification)
+            );
         }
         #region Dispose
 

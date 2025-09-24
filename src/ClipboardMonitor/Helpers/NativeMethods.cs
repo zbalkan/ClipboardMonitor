@@ -2,10 +2,24 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ClipboardMonitor
+namespace ClipboardMonitor.Helpers
 {
     internal static class NativeMethods
     {
+
+        internal const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+
+        internal const uint WINEVENT_OUTOFCONTEXT = 0;
+
+        internal delegate void WinEventDelegate(
+                                            IntPtr hWinEventHook,
+                                            uint eventType,
+                                            IntPtr hwnd,
+                                            int idObject,
+                                            int idChild,
+                                            uint dwEventThread,
+                                            uint dwmsEventTime);
+
         #region advapi32.dll
 
         [DllImport("advapi32.dll", SetLastError = true)]
@@ -57,10 +71,30 @@ namespace ClipboardMonitor
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern IntPtr SetWinEventHook(
+            uint eventMin,
+            uint eventMax,
+            IntPtr hmodWinEventProc,
+            WinEventDelegate lpfnWinEventProc,
+            uint idProcess,
+            uint idThread,
+            uint dwFlags);
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern bool UnhookWinEvent(IntPtr hWinEventHook);
         #endregion user32.dll
 
         #region shell32.dll
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern int SetCurrentProcessExplicitAppUserModelID(string appID);
         #endregion shell32.dll
     }

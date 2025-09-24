@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using ClipboardMonitor.Helpers;
 using Windows.UI.Notifications;
 
 namespace ClipboardMonitor
@@ -34,15 +35,7 @@ namespace ClipboardMonitor
                 var textNodes = xml.GetElementsByTagName("text");
                 textNodes[0].InnerText = message;
                 var iconNodes = xml.GetElementsByTagName("image");
-                string iconPath = null;
-                if (DarkModeHelper.IsDarkModeEnabled())
-                {
-                    iconPath = Path.GetFullPath("Assets/icon-inverted.png");
-                }
-                else
-                {
-                    iconPath = Path.GetFullPath("Assets/icon.png");
-                }
+                var iconPath = DarkModeHelper.IsDarkModeEnabled() ? Path.GetFullPath("Assets/icon-inverted.png") : Path.GetFullPath("Assets/icon.png");
                 iconNodes[0].Attributes.GetNamedItem("src").NodeValue = iconPath;
                 var toast = new ToastNotification(xml);
                 ToastNotificationManager.CreateToastNotifier(_appId).Show(toast);
@@ -70,7 +63,11 @@ namespace ClipboardMonitor
 
                     if (alert != null)
                     {
-                        ClipboardHelper.SetText(_substituteText);
+                        if (alert.ClearClipboard)
+                        {
+                            ClipboardHelper.SetText(_substituteText);
+                        }
+
                         var logMessage = $"{alert.Title}\n\n{alert.Detail}";
                         Logger.Instance.LogWarning(logMessage, 20);
                         SendNotification(alert.Title + "\n\nThe incident is logged.");

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using ClipboardMonitor.Helpers;
 
 namespace ClipboardMonitor
 {

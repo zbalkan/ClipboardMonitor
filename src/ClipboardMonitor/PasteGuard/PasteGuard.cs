@@ -1,7 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using ClipboardMonitor.PAN;
@@ -10,85 +9,108 @@ namespace ClipboardMonitor.PasteGuard
 {
     internal static class PasteGuard
     {
-        private const int VK_LWIN = 0x5B;
-
-        private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
-
         private const int LAST_N_SECONDS = 30;
-
-        private const int VK_R = 0x52;
-
-        private const int WH_KEYBOARD_LL = 13;
-
-        private const int WM_KEYDOWN = 0x0100;
-
-        private static readonly NativeMethods.LowLevelProc _proc = HookCallback;
-
+        private static readonly Helpers.NativeMethods.WinEventDelegate _winEventProc = WinEventCallback;
         private static readonly TimeSpan Window = TimeSpan.FromSeconds(LAST_N_SECONDS);
 
-        private static IntPtr _hook = IntPtr.Zero;
-
+        private static IntPtr _lastRunDialog = IntPtr.Zero;
+        private static ProcessSummary _processSummary;
+        private static Action<ProcessSummary, string> _registeredAction;
         private static string _riskContent = string.Empty;
-
         private static long _riskUtcTicks;
-
-        private static Action<string> _registeredAction;
-
-        public static void RegisterAction(Action<string> action) => _registeredAction = action ?? throw new ArgumentNullException(nameof(action));
+        private static IntPtr _winEventHookForeground = IntPtr.Zero;
+        private static ProcessSummary BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
+        private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
 
         public static void Install()
         {
-            if (_hook == IntPtr.Zero)
+            if (_winEventHookForeground == IntPtr.Zero)
             {
-                var hMod = NativeMethods.GetModuleHandle(null);
-                _hook = NativeMethods.SetWindowsHookEx(
-                            WH_KEYBOARD_LL,
-                            _proc,
-                            hMod,
-                            0);
-                if (_hook == IntPtr.Zero)
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error(),
-                        "Failed to install keyboard hook.");
-                }
+                _winEventHookForeground = Helpers.NativeMethods.SetWinEventHook(Helpers.NativeMethods.EVENT_SYSTEM_FOREGROUND, Helpers.NativeMethods.EVENT_SYSTEM_FOREGROUND,
+                    IntPtr.Zero, _winEventProc, 0, 0, Helpers.NativeMethods.WINEVENT_OUTOFCONTEXT);
             }
         }
 
-        public static void MarkRiskyBrowserCopy(string payload)
-        {
-            Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
-            Volatile.Write(ref _riskContent,
-                           payload.Length > 200 ? MaskPayload(payload.Substring(0, 200)) : MaskPayload(payload));
-        }
+        public static void RegisterAction(Action<ProcessSummary, string> action) =>
+                    _registeredAction = action ?? throw new ArgumentNullException(nameof(action));
 
         public static void Remove()
         {
-            if (_hook != IntPtr.Zero)
+            if (_winEventHookForeground != IntPtr.Zero)
             {
-                NativeMethods.UnhookWindowsHookEx(_hook);
-                _hook = IntPtr.Zero;
+                Helpers.NativeMethods.UnhookWinEvent(_winEventHookForeground);
+                _winEventHookForeground = IntPtr.Zero;
             }
         }
 
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        public static void SetSuspiciousActivityContent(ProcessSummary processSummary, string content)
         {
-            if (nCode >= 0 && wParam.ToInt32() == WM_KEYDOWN)
-            {
-                var kb = Marshal.PtrToStructure<NativeMethods.KBDLLHOOKSTRUCT>(lParam);
-                if (kb.vkCode == VK_R && WinHeld() // User hits Windows + R
-                    && IsRecentRisk() // Within 30 secs after a browser copy-paste
-                    && _registeredAction != null) // And there is an action registered.
-                {
-                    Task.Run(() => _registeredAction.Invoke(CurrentRiskContent));
-                }
-            }
-            return NativeMethods.CallNextHookEx(_hook, nCode, wParam, lParam);
+            Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
+            Volatile.Write(ref _processSummary, processSummary);
+            Volatile.Write(ref _riskContent,
+                content.Length > 200 ? MaskPayload(content.Substring(0, 200)) : MaskPayload(content));
         }
 
-        private static bool IsRecentRisk() => DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
+        private static string GetClassName(IntPtr hWnd)
+        {
+            var sb = new StringBuilder(256);
+            Helpers.NativeMethods.GetClassName(hWnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
 
-        private static bool WinHeld() => (NativeMethods.GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
+        private static bool IsRecentRisk() =>
+            DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
 
         private static string MaskPayload(string payload) => PANHelper.Mask(payload);
+
+        private static void WinEventCallback(
+             IntPtr hWinEventHook,
+             uint eventType,
+             IntPtr hwnd,
+             int idObject,
+             int idChild,
+             uint dwEventThread,
+             uint dwmsEventTime)
+        {
+            if (hwnd == IntPtr.Zero || idObject != 0) // OBJID_WINDOW only
+            {
+                return;
+            }
+
+            var cls = GetClassName(hwnd);
+            if (cls == "#32770")
+            {
+                Helpers.NativeMethods.GetWindowThreadProcessId(hwnd, out var pid);
+                try
+                {
+                    using (var proc = Process.GetProcessById((int)pid))
+                    {
+                        var exeName = proc.ProcessName;
+                        var exePath = proc.MainModule?.FileName ?? string.Empty;
+
+                        if (exeName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (hwnd == _lastRunDialog)
+                            {
+                                return;
+                            }
+
+                            _lastRunDialog = hwnd;
+
+                            if (!IsRecentRisk())
+                            {
+                                return;
+                            }
+
+                            Task.Run(() => _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent));
+                        }
+                    }
+                }
+                catch
+                {
+                    // process may have exited, ignore
+                }
+            }
+        }
     }
 }

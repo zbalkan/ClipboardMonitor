@@ -56,6 +56,10 @@ namespace ClipboardMonitor
                     }
 
                     var alert = _scanner.Scan(content);
+                    if (alert == default)
+                    {
+                        return;
+                    }
                     AlertHandler.Instance.InvokeAlert(alert);
                     SendNotification(alert.Title + "\n\nThe incident is logged.");
                 }

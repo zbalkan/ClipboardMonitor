@@ -15,11 +15,11 @@ namespace ClipboardMonitor
 
         private static string _appId;
 
-        public ClipboardNotification(string warningText)
+        public ClipboardNotification()
         {
             _appId = Helpers.AppIdHelper.EnsureAppId();
 
-            _notificationForm = new NotificationHandlerForm(warningText, _appId);
+            _notificationForm = new NotificationHandlerForm(_appId);
         }
 
         public void Dispose()

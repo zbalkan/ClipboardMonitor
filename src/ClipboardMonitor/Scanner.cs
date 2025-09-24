@@ -19,7 +19,6 @@ namespace ClipboardMonitor
         {
             _amsiContext = AmsiContext.Create("ClipboardMonitor");
             _amsiSession = _amsiContext.CreateSession();
-            PasteGuard.PasteGuard.RegisterAction(WarningAction);
         }
 
         public Alert Scan(string content)
@@ -29,18 +28,17 @@ namespace ClipboardMonitor
 
             if (IsCopiedFromBrowser())
             {
-                PasteGuard.PasteGuard.SetSuspiciousActivityContent(processSummary, content);
+                PasteGuardWrapper.NotifyPasteGuard(processSummary, content);
                 if (IsSuspicious(content))
                 {
                     return CreateSuspiciousActivityAlert(processSummary, content);
                 }
-                if (_amsiSession.IsMalware(content, "Clipboard"))
-                {
-                    return CreateMalwareAlert(processSummary, content);
-                }
 
             }
-
+            if (_amsiSession.IsMalware(content, "Clipboard"))
+            {
+                return CreateMalwareAlert(processSummary, content);
+            }
             var searchResult = PANHelper.Parse(content);
             return searchResult == null || searchResult.Count == 0 ? default : CreatePanAlert(processSummary, searchResult);
         }
@@ -175,51 +173,6 @@ namespace ClipboardMonitor
             return SuspiciousContent.HasSuspiciousText(normalised);
         }
 
-        private static void WarningAction(ProcessSummary processSummary, string content)
-        {
-            var incidents = new StringBuilder(500);
-            incidents.AppendLine("Detected Run dialog following suspicious text copied from browser.");
-            if (processSummary == default)
-            {
-                incidents
-                .Append("Suspicious content: ").AppendLine(content)
-                .AppendLine("Failed to get executable information")
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-            }
-            else
-            {
-                incidents
-                .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
-                .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                .AppendLine("Suspicious content: ")
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine(content)
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-            }
-            Logger.Instance.LogWarning(incidents.ToString(), 21);
-
-            var message = new StringBuilder(500);
-            message.AppendLine("Do not paste web content into the Run dialog unless you fully trust the source.\n")
-                .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                .AppendLine("Suspicious content: ")
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine(content)
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-
-
-            Task.Run(() =>
-                MessageBox.Show(message.ToString(),
-                                "Detected Run dialog following suspicious text copied from browser.",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning,
-                                MessageBoxDefaultButton.Button1,
-                                MessageBoxOptions.ServiceNotification)
-            );
-        }
         #region Dispose
 
         public void Dispose()

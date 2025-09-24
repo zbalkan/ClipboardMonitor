@@ -5,8 +5,6 @@ using System.Reflection;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
-using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 
 namespace ClipboardMonitor
 {
@@ -16,6 +14,7 @@ namespace ClipboardMonitor
     public partial class App : Application, IDisposable
     {
         private ClipboardNotification _notification;
+        private PasteGuardWrapper _riskMonitor;
         private bool _disposedValue;
 
 
@@ -44,10 +43,11 @@ namespace ClipboardMonitor
             SetupExceptionHandling();
 
             Logger.Instance.LogInfo("Started a new ClipboardMonitor instance.", 10);
+            AlertHandler.Instance.SubstituteText = "REDACTED";
 
-            _notification = new ClipboardNotification("REDACTED");
+            _notification = new ClipboardNotification();
+            _riskMonitor = new PasteGuardWrapper();
 
-            PasteGuard.PasteGuard.Install();
         }
 
         private static void HandleArguments()
@@ -191,7 +191,6 @@ namespace ClipboardMonitor
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
-            PasteGuard.PasteGuard.Remove();
             //ProcessHelper.UnsetCriticalProcess();
             base.OnExit(e);
         }

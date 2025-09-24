@@ -80,6 +80,7 @@
     </ApplicationDefinition>
     <Compile Include="AhoCorasickTree.cs" />
     <Compile Include="Alert.cs" />
+    <Compile Include="AlertHandler.cs" />
     <Compile Include="AMSI\AmsiContext.cs" />
     <Compile Include="AMSI\AmsiContextSafeHandle.cs" />
     <Compile Include="AMSI\AmsiResult.cs" />
@@ -99,6 +100,7 @@
     <Compile Include="PaymentBrands\Jcb.cs" />
     <Compile Include="PaymentBrands\Maestro.cs" />
     <Compile Include="PaymentBrands\UnionPay.cs" />
+    <Compile Include="PasteGuardWrapper.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="SuspiciousContent.cs" />
   </ItemGroup>

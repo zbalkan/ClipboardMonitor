@@ -3,9 +3,8 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ClipboardMonitor.PAN;
 
-namespace ClipboardMonitor.PasteGuard
+namespace ClipboardMonitor
 {
     internal static class PasteGuard
     {
@@ -47,8 +46,7 @@ namespace ClipboardMonitor.PasteGuard
         {
             Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
             Volatile.Write(ref _processSummary, processSummary);
-            Volatile.Write(ref _riskContent,
-                content.Length > 200 ? MaskPayload(content.Substring(0, 200)) : MaskPayload(content));
+            Volatile.Write(ref _riskContent, content);
         }
 
         private static string GetClassName(IntPtr hWnd)
@@ -60,8 +58,6 @@ namespace ClipboardMonitor.PasteGuard
 
         private static bool IsRecentRisk() =>
             DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
-
-        private static string MaskPayload(string payload) => PANHelper.Mask(payload);
 
         private static void WinEventCallback(
              IntPtr hWinEventHook,

@@ -11,15 +11,12 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly Scanner _scanner;
-            private readonly string _substituteText;
             private static string _appId;
-
-
-            public NotificationHandlerForm(string substituteText, string appId)
+            public NotificationHandlerForm(string appId)
             {
-                _substituteText = substituteText;
                 _appId = appId;
                 _scanner = new Scanner();
+
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
                 NativeMethods.SetParent(Handle, HWND_MESSAGE);
@@ -53,28 +50,19 @@ namespace ClipboardMonitor
                     var content = ClipboardHelper.GetText();
 
                     // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
-                    if (string.IsNullOrEmpty(content) || _substituteText.Equals(content))
+                    if (string.IsNullOrEmpty(content) || AlertHandler.Instance.SubstituteText.Equals(content))
                     {
                         return;
                     }
 
                     var alert = _scanner.Scan(content);
-
-                    if (alert != null)
-                    {
-                        if (alert.ClearClipboard)
-                        {
-                            ClipboardHelper.SetText(_substituteText);
-                        }
-
-                        var logMessage = $"{alert.Title}\n\n{alert.Detail}";
-                        Logger.Instance.LogWarning(logMessage, 20);
-                        SendNotification(alert.Title + "\n\nThe incident is logged.");
-                    }
+                    AlertHandler.Instance.InvokeAlert(alert);
+                    SendNotification(alert.Title + "\n\nThe incident is logged.");
                 }
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
+
             #region Dispose
             protected override void Dispose(bool disposing)
             {

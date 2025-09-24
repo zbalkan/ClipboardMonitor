@@ -187,7 +187,7 @@ namespace ClipboardMonitor
             );
 
             var incidents = new StringBuilder(500);
-            incidents.AppendLine("Win+R action detected after suspicious text copy from browser.");
+            incidents.AppendLine("Detected Run dialog following suspicious text copied from browser.");
             if (processSummary == default)
             {
                 incidents

@@ -11,7 +11,7 @@ namespace ClipboardMonitor.AMSI
         {
         }
 
-        public override bool IsInvalid => Context.IsInvalid || base.IsInvalid;
+        public override bool IsInvalid => Context == null || Context.IsInvalid || base.IsInvalid;
 
         protected override bool ReleaseHandle()
         {

@@ -22,6 +22,16 @@ namespace ClipboardMonitor.PAN
 
         public PANData AddPaymentBrand(IPaymentBrand paymentBrand)
         {
+            if (paymentBrand == null)
+            {
+                throw new ArgumentNullException(nameof(paymentBrand));
+            }
+
+            if (_paymentBrands.Any(pb => pb.GetType() == paymentBrand.GetType()))
+            {
+                return this;
+            }
+
             _paymentBrands.Add(paymentBrand);
             return this;
         }
@@ -51,7 +61,7 @@ namespace ClipboardMonitor.PAN
 
                 var brandName = brand.ToString();
 
-                list.AddRange(result.Select(p => new SuspectedPANData { MaskedPAN = Sanitize(p), PaymentBrand = brandName }));
+                list.AddRange(result.Select(p => new SuspectedPANData { MaskedPAN = Mask(GetOnlyNumbers(p)), PaymentBrand = brandName }));
             }
 
             return list.AsReadOnly();
@@ -70,7 +80,7 @@ namespace ClipboardMonitor.PAN
             }
 
             // Collect all PAN matches from all brands
-            var matches = _paymentBrands.SelectMany(b => b.Parse(text));
+            var matches = _paymentBrands.SelectMany(b => b.Parse(text)).ToList();
 
             if (!matches.Any())
             {

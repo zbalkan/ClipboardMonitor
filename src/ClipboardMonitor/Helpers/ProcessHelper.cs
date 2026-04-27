@@ -40,7 +40,7 @@ namespace ClipboardMonitor
 
                 // Get process
                 NativeMethods.GetWindowThreadProcessId(ownerWindow, out var pid);
-                var process = FindProcessById(pid.ToInt32());
+                var process = FindProcessById((int)pid);
 
                 if (process == null)
                 {
@@ -101,7 +101,10 @@ namespace ClipboardMonitor
             Process.EnterDebugMode();  //acquire Debug Privileges
 
             // setting the BreakOnTermination = 1 for the current process
-            _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
+            using (var currentProcess = Process.GetCurrentProcess())
+            {
+                _ = NativeMethods.NtSetInformationProcess(currentProcess.Handle, BreakOnTermination, ref isCritical, sizeof(int));
+            }
         }
 
         public static void UnsetCriticalProcess()
@@ -112,7 +115,10 @@ namespace ClipboardMonitor
             Process.EnterDebugMode();  //acquire Debug Privileges
 
             // setting the BreakOnTermination = 0 for the current process
-            _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
+            using (var currentProcess = Process.GetCurrentProcess())
+            {
+                _ = NativeMethods.NtSetInformationProcess(currentProcess.Handle, BreakOnTermination, ref isCritical, sizeof(int));
+            }
         }
 
         private static Process FindProcessById(int processId)
@@ -136,19 +142,22 @@ namespace ClipboardMonitor
         public static void Cover()
         {
             // Get the current process handle
-            var hProcess = Process.GetCurrentProcess().Handle;
+            using (var currentProcess = Process.GetCurrentProcess())
+            {
+                var hProcess = currentProcess.Handle;
 
-            // Read the DACL
-            var dacl = GetProcessSecurityDescriptor(hProcess);
+                // Read the DACL
+                var dacl = GetProcessSecurityDescriptor(hProcess);
 
-            // Modify Users ACE
-            var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessDenied,
-                (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
-                false, null);
-            dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
+                // Modify Users ACE
+                var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessDenied,
+                    (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                    false, null);
+                dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
 
-            // Save the DACL
-            SetProcessSecurityDescriptor(hProcess, dacl);
+                // Save the DACL
+                SetProcessSecurityDescriptor(hProcess, dacl);
+            }
             _isProtected = true;
         }
 
@@ -160,19 +169,22 @@ namespace ClipboardMonitor
             }
 
             // Get the current process handle
-            var hProcess = Process.GetCurrentProcess().Handle;
+            using (var currentProcess = Process.GetCurrentProcess())
+            {
+                var hProcess = currentProcess.Handle;
 
-            // Read the DACL
-            var dacl = GetProcessSecurityDescriptor(hProcess);
+                // Read the DACL
+                var dacl = GetProcessSecurityDescriptor(hProcess);
 
-            // Modify Users ACE
-            var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessAllowed,
-                (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
-                false, null);
-            dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
+                // Modify Users ACE
+                var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessAllowed,
+                    (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                    false, null);
+                dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
 
-            // Save the DACL
-            SetProcessSecurityDescriptor(hProcess, dacl);
+                // Save the DACL
+                SetProcessSecurityDescriptor(hProcess, dacl);
+            }
             _isProtected = false;
         }
 

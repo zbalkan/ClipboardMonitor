@@ -151,13 +151,11 @@ namespace ClipboardMonitor
                 return false;
             }
 
-            var normalised = content
-                    .Normalize(NormalizationForm.FormKD)
-                    .ToUpperInvariant();
+            var normalised = content.Normalize(NormalizationForm.FormKD);
 
             foreach (var token in SuspiciousText)
             {
-                if (normalised.IndexOf(token, StringComparison.Ordinal) >= 0)
+                if (normalised.IndexOf(token, StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     return true;
                 }

@@ -68,6 +68,15 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
+        public void Test_PAN_Valid_Discover_19Digits()
+        {
+            const string cardNumber = "6011000000000000004";
+            var pan = PANData.Instance.Parse(cardNumber)[0];
+
+            Assert.AreEqual("Discover", pan.PaymentBrand);
+        }
+
+        [TestMethod]
         public void Test_PAN_Valid_Discover_EmbeddedInText()
         {
             const string text = "Approved: 6011111111111117 for purchase.";

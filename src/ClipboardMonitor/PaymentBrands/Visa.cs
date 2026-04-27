@@ -6,7 +6,7 @@ namespace ClipboardMonitor.PaymentBrands
     {
         private const string _brand = "Visa";
         private readonly Regex _pattern = new Regex(
-            @"(?:\D|^)(4[0-9]{12}|4[0-9]{3}(?:[ \-]?[0-9]{4}){3}|4[0-9]{3}(?:[ \-]?[0-9]{4}){3}[ \-]?[0-9]{3})(?:\D|$)",
+            @"(?<!\d)(4[0-9]{12}|4[0-9]{3}(?:[ \-]?[0-9]{4}){3}|4[0-9]{3}(?:[ \-]?[0-9]{4}){3}[ \-]?[0-9]{3})(?!\d)",
             RegexOptions.Compiled);
 
         public override Regex GetPattern() => _pattern;

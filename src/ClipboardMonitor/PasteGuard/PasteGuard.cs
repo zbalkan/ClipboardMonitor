@@ -56,9 +56,16 @@ namespace ClipboardMonitor.PasteGuard
 
         public static void MarkRiskyBrowserCopy(string payload)
         {
+            var safePayload = payload ?? string.Empty;
             Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
+            if (safePayload.Length == 0)
+            {
+                Volatile.Write(ref _riskContent, string.Empty);
+                return;
+            }
+
             Volatile.Write(ref _riskContent,
-                           payload.Length > 200 ? MaskPayload(payload.Substring(0, 200)) : MaskPayload(payload));
+                           safePayload.Length > 200 ? MaskPayload(safePayload.Substring(0, 200)) : MaskPayload(safePayload));
         }
 
         public static void Remove()

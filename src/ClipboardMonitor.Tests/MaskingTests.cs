@@ -42,6 +42,15 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
+        public void Test_Mask_EmbeddedPAN_DoesNotRemoveDelimiters()
+        {
+            const string input = "Card=4012888888881881;";
+            var masked = PANData.Instance.Sanitize(input);
+
+            Assert.AreEqual("Card=401288******1881;", masked);
+        }
+
+        [TestMethod]
         [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Null_Throws()
         {

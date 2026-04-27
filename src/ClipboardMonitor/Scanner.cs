@@ -29,8 +29,7 @@ namespace ClipboardMonitor
             _amsiSession = _amsiContext.CreateSession();
             void warningAction(string riskyContent)
             {
-                MessageBox.Show($"Pasting web content into the Run dialog is dangerous. Use extreme caution.\n\n{riskyContent}",
-                                "Danger!",
+                MessageBox.Show($"Pasting web content into Run or elevated shells (for example Win+X then I) is dangerous. Use extreme caution.\n\n{riskyContent}", "Danger!",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Warning,
                                 MessageBoxDefaultButton.Button1,

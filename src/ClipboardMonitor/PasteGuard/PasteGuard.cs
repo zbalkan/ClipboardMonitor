@@ -18,6 +18,10 @@ namespace ClipboardMonitor.PasteGuard
 
         private const int VK_R = 0x52;
 
+        private const int VK_X = 0x58;
+
+        private const int VK_I = 0x49;
+
         private const int WH_KEYBOARD_LL = 13;
 
         private const int WM_KEYDOWN = 0x0100;
@@ -31,6 +35,8 @@ namespace ClipboardMonitor.PasteGuard
         private static string _riskContent = string.Empty;
 
         private static long _riskUtcTicks;
+
+        private static long _lastWinXUtcTicks;
 
         private static Action<string> _registeredAction;
 
@@ -82,7 +88,16 @@ namespace ClipboardMonitor.PasteGuard
             if (nCode >= 0 && wParam.ToInt32() == WM_KEYDOWN)
             {
                 var kb = Marshal.PtrToStructure<NativeMethods.KBDLLHOOKSTRUCT>(lParam);
-                if (kb.vkCode == VK_R && WinHeld() // User hits Windows + R
+                var key = kb.vkCode;
+                if (key == VK_X && WinHeld()) // User hits Windows + X
+                {
+                    Volatile.Write(ref _lastWinXUtcTicks, DateTime.UtcNow.Ticks);
+                }
+
+                var shortcutTriggered = (key == VK_R && WinHeld()) // User hits Windows + R
+                                        || (key == VK_I && TryConsumeRecentWinX()); // User follows Win + X with I
+
+                if (shortcutTriggered
                     && IsRecentRisk() // Within 30 secs after a browser copy-paste
                     && _registeredAction != null) // And there is an action registered.
                 {
@@ -93,6 +108,23 @@ namespace ClipboardMonitor.PasteGuard
         }
 
         private static bool IsRecentRisk() => DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
+
+        private static bool TryConsumeRecentWinX()
+        {
+            while (true)
+            {
+                var lastWinXUtcTicks = Volatile.Read(ref _lastWinXUtcTicks);
+                if (DateTime.UtcNow.Ticks - lastWinXUtcTicks > Window.Ticks)
+                {
+                    return false;
+                }
+
+                if (Interlocked.CompareExchange(ref _lastWinXUtcTicks, 0, lastWinXUtcTicks) == lastWinXUtcTicks)
+                {
+                    return true;
+                }
+            }
+        }
 
         private static bool WinHeld() => (NativeMethods.GetAsyncKeyState(VK_LWIN) & 0x8000) != 0;
 

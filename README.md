@@ -6,9 +6,9 @@
 ClipboardMonitor is a lightweight background utility that tracks **clipboard** usage.
 It
 
-* filters text for high-risk tokens (`POWERSHELL`, `MSHTA`, `CMD`, `MSIEXEC`, etc.) copied **from well-known browsers**, and submits matches to **AMSI** for antivirus verdicts;
+* filters text for high-risk tokens (`POWERSHELL`, `MSHTA`, `CMD`, `MSIEXEC`, toast-notification API keywords, etc.) copied **from well-known browsers**, and submits matches to **AMSI** for antivirus verdicts;
 * detects **payment-card PANs**, masks them, and scrubs the clipboard (sample DLP);
-* warns the user if they press **Win + R** within 30 s of a risky copy;  
+* warns the user if they press **Win + R** *or* trigger **Win + X -> I** within 30 s of a risky copy;
 * logs every incident asynchronously to the Windows Event Log.
 * uses a toast notification to inform the user.
 

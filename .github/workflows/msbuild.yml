@@ -21,14 +21,23 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
 
-      # Add Visual Studio environment setup
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v1
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $msbuildPath = & $vswhere -latest -requires Microsoft.Component.MSBuild -find "MSBuild\**\Bin\MSBuild.exe" | Select-Object -First 1
+          if (-not $msbuildPath) { throw "MSBuild.exe not found via vswhere." }
+          Split-Path -Parent $msbuildPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Setup VSTest
-        uses: darenm/Setup-VSTest@v1
+      - name: Setup VSTest path
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $vstestPath = & $vswhere -latest -find "Common7\IDE\Extensions\TestPlatform\vstest.console.exe" | Select-Object -First 1
+          if (-not $vstestPath) { throw "vstest.console.exe not found via vswhere." }
+          Split-Path -Parent $vstestPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       # Restore NuGet packages
       - name: Restore NuGet packages

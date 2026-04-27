@@ -8,11 +8,17 @@ namespace ClipboardMonitor.Tests
     [TestClass]
     public class MaskingTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            PANData.Instance.AddPaymentBrand(new Visa());
+        }
+
         [TestMethod]
         public void Test_Mask_FullDigits()
         {
             const string input = "4012888888881881";
-            var masked = PANHelper.Mask(input);
+            var masked = PANData.Instance.Sanitize(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
@@ -21,7 +27,7 @@ namespace ClipboardMonitor.Tests
         public void Test_Mask_WithSpaces()
         {
             const string input = "4012 8888 8888 1881";
-            var masked = PANHelper.Mask(input);
+            var masked = PANData.Instance.Sanitize(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
@@ -30,21 +36,33 @@ namespace ClipboardMonitor.Tests
         public void Test_Mask_WithDashes()
         {
             const string input = "4012-8888-8888-1881";
-            var masked = PANHelper.Mask(input);
+            var masked = PANData.Instance.Sanitize(input);
 
             Assert.AreEqual("401288******1881", masked);
         }
 
         [TestMethod]
-        public void Test_Mask_Null_Throws()
+        public void Test_Mask_EmbeddedPAN_DoesNotRemoveDelimiters()
         {
-            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(null));
+            const string input = "Card=4012888888881881;";
+            var masked = PANData.Instance.Sanitize(input);
+
+            Assert.AreEqual("Card=401288******1881;", masked);
         }
 
         [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Test_Mask_Null_Throws()
+        {
+            PANData.Instance.Sanitize(null);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
         public void Test_Mask_Empty_Throws()
         {
-            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(string.Empty));
+            PANData.Instance.Sanitize(string.Empty);
         }
     }
+
 }

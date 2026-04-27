@@ -11,12 +11,15 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly Scanner _scanner;
+            private readonly string _substituteText;
             private static string _appId;
-            public NotificationHandlerForm(string appId)
+
+
+            public NotificationHandlerForm(string substituteText, string appId)
             {
+                _substituteText = substituteText;
                 _appId = appId;
                 _scanner = new Scanner();
-
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
                 NativeMethods.SetParent(Handle, HWND_MESSAGE);
@@ -31,7 +34,15 @@ namespace ClipboardMonitor
                 var textNodes = xml.GetElementsByTagName("text");
                 textNodes[0].InnerText = message;
                 var iconNodes = xml.GetElementsByTagName("image");
-                var iconPath = DarkModeHelper.IsDarkModeEnabled() ? Path.GetFullPath("Assets/icon-inverted.png") : Path.GetFullPath("Assets/icon.png");
+                string iconPath = null;
+                if (DarkModeHelper.IsDarkModeEnabled())
+                {
+                    iconPath = Path.GetFullPath("Assets/icon-inverted.png");
+                }
+                else
+                {
+                    iconPath = Path.GetFullPath("Assets/icon.png");
+                }
                 iconNodes[0].Attributes.GetNamedItem("src").NodeValue = iconPath;
                 var toast = new ToastNotification(xml);
                 ToastNotificationManager.CreateToastNotifier(_appId).Show(toast);
@@ -50,28 +61,37 @@ namespace ClipboardMonitor
                     var content = ClipboardHelper.GetText();
 
                     // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
-                    if (string.IsNullOrEmpty(content) || AlertHandler.Instance.SubstituteText.Equals(content))
+                    if (string.IsNullOrEmpty(content) || _substituteText.Equals(content))
                     {
                         return;
                     }
 
                     var alert = _scanner.Scan(content);
-                    if (alert == default)
+
+                    if (alert != null)
                     {
-                        return;
+                        ClipboardHelper.SetText(_substituteText);
+                        var logMessage = $"{alert.Title}\n\n{alert.Detail}";
+                        Logger.Instance.LogWarning(logMessage, 20);
+                        SendNotification(alert.Title + "\n\nThe incident is logged.");
                     }
-                    AlertHandler.Instance.InvokeAlert(alert);
-                    SendNotification(alert.Title + "\n\nThe incident is logged.");
                 }
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }
-
             #region Dispose
             protected override void Dispose(bool disposing)
             {
-                NativeMethods.RemoveClipboardFormatListener(Handle);
-                _scanner.Dispose();
+                if (disposing)
+                {
+                    if (IsHandleCreated && !IsDisposed)
+                    {
+                        NativeMethods.RemoveClipboardFormatListener(Handle);
+                    }
+
+                    _scanner.Dispose();
+                }
+
                 base.Dispose(disposing);
             }
 

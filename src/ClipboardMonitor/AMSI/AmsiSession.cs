@@ -22,10 +22,19 @@ namespace ClipboardMonitor.AMSI
                 throw new Win32Exception(returnValue);
             }
 
-            return AmsiResultIsMalware(result);
+            return NativeMethods.AmsiResultIsMalware(result);
         }
 
-        private static bool AmsiResultIsMalware(AmsiResult result) => result >= AmsiResult.AMSI_RESULT_DETECTED;
+        public bool IsMalware(byte[] payload, string contentName)
+        {
+            var returnValue = NativeMethods.AmsiScanBuffer(_context, payload, (uint)payload.Length, contentName, _session, out var result);
+            if (returnValue != 0)
+            {
+                throw new Win32Exception(returnValue);
+            }
+
+            return NativeMethods.AmsiResultIsMalware(result);
+        }
 
         public void Dispose()
         {

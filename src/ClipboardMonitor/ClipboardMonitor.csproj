@@ -78,9 +78,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AhoCorasickTree.cs" />
     <Compile Include="Alert.cs" />
-    <Compile Include="AlertHandler.cs" />
+    <Compile Include="AMSI\NativeMethods.cs" />
     <Compile Include="AMSI\AmsiContext.cs" />
     <Compile Include="AMSI\AmsiContextSafeHandle.cs" />
     <Compile Include="AMSI\AmsiResult.cs" />
@@ -93,26 +92,23 @@
     <Compile Include="ClipboardNotification.NotificationHandlerForm.cs" />
     <Compile Include="Helpers\AppIdHelper.cs" />
     <Compile Include="Helpers\DarkModeHelper.cs" />
-    <Compile Include="PAN\PANHelper.cs" />
-    <Compile Include="PasteGuard.cs" />
+    <Compile Include="PasteGuard\NativeMethods.cs" />
+    <Compile Include="PasteGuard\PasteGuard.cs" />
     <Compile Include="PaymentBrands\DinersClub.cs" />
     <Compile Include="PaymentBrands\Discover.cs" />
     <Compile Include="PaymentBrands\Jcb.cs" />
-    <Compile Include="PaymentBrands\Maestro.cs" />
     <Compile Include="PaymentBrands\UnionPay.cs" />
-    <Compile Include="PasteGuardWrapper.cs" />
     <Compile Include="Scanner.cs" />
-    <Compile Include="SuspiciousContent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\ClipboardHelper.cs" />
     <Compile Include="ClipboardNotification.cs" />
     <Compile Include="DelegateCommand.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="PANException.cs" />
     <Compile Include="PAN\Luhn.cs" />
-    <Compile Include="PAN\PaymentBrandRegistry.cs" />
+    <Compile Include="PAN\PANData.cs" />
     <Compile Include="PAN\SuspectedPANData.cs" />
     <Compile Include="PaymentBrands\Amex.cs" />
     <Compile Include="PaymentBrands\IPaymentBrand.cs" />

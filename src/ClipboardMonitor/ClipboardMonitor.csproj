@@ -3,8 +3,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net481</TargetFramework>
-    <!-- Hybrid Support -->
-    <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     
     <LangVersion>latest</LangVersion>
@@ -21,11 +19,8 @@
     <Version>2.0.0.0</Version>
     <FileVersion>2.0.0.0</FileVersion>
     
-    <!-- WPF Specific: Replaces the ThemeInfo attribute -->
-    <TargetExtrasVersions>true</TargetExtrasVersions>
-
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
-    <StartupObject>ClipboardMonitor.App</StartupObject>
+    <StartupObject>ClipboardMonitor.Program</StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Deterministic>true</Deterministic>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,13 +44,10 @@
     <PackageReference Include="Nullable" Version="1.3.1" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Assets\icon-inverted.png;Assets\icon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\icon.png" />
+    <EmbeddedResource Include="Assets\icon-inverted.png" />
     <None Update="Assets\icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

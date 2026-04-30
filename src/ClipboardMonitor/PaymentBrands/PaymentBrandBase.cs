@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -15,7 +14,7 @@ namespace ClipboardMonitor.PaymentBrands
 
             if (matches.Count == 0)
             {
-                return Array.Empty<string>();
+                return [];
             }
 
             return matches

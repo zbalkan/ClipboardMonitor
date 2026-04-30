@@ -4,18 +4,22 @@ namespace ClipboardMonitor.AMSI
 {
     internal partial class AmsiSessionSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        internal AmsiContextSafeHandle Context { get; set; }
+        internal AmsiContextSafeHandle? Context { get; set; }
 
         public AmsiSessionSafeHandle()
             : base(ownsHandle: true)
         {
         }
 
-        public override bool IsInvalid => Context.IsInvalid || base.IsInvalid;
+        public override bool IsInvalid => Context == null || Context.IsInvalid || base.IsInvalid;
 
         protected override bool ReleaseHandle()
         {
-            NativeMethods.AmsiCloseSession(Context, handle);
+            if (IsInvalid)
+            {
+                return false;
+            }
+            NativeMethods.AmsiCloseSession(Context!, handle);
             return true;
         }
     }

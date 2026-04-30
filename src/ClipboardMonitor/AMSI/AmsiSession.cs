@@ -27,9 +27,6 @@ namespace ClipboardMonitor.AMSI
 
         private static bool AmsiResultIsMalware(AmsiResult result) => result >= AmsiResult.AMSI_RESULT_DETECTED;
 
-        public void Dispose()
-        {
-            _session.Dispose();
-        }
+        public void Dispose() => _session.Dispose();
     }
 }

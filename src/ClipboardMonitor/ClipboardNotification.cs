@@ -7,13 +7,13 @@ namespace ClipboardMonitor
         //Reference https://docs.microsoft.com/en-us/windows/desktop/dataxchg/wm-clipboardupdate
         public const int WM_CLIPBOARDUPDATE = 0x031D;
 
-        private static readonly IntPtr HWND_MESSAGE = new IntPtr(-3); //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
+        private static readonly IntPtr HWND_MESSAGE = new(-3); //Reference https://www.pinvoke.net/default.aspx/Constants.HWND
 
         private readonly NotificationHandlerForm _notificationForm;
 
         private bool _disposedValue;
 
-        private static string _appId;
+        private static string? _appId;
 
         public ClipboardNotification()
         {

@@ -4,9 +4,8 @@
     {
         public static bool HasSuspiciousText(string content) => _suspicious.Contains(content);
 
-        private static readonly AhoCorasickTree _suspicious = new AhoCorasickTree(
-          new[]
-           {
+        private static readonly AhoCorasickTree _suspicious = new(
+          [
                     "pwsh",
                     "powershell",
                     "mshta",
@@ -24,7 +23,7 @@
                     "Invoke-RestMethod",
                     "iex",
                     "Invoke-Expression",
-          }
+          ]
       );
     }
 }

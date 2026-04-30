@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ClipboardMonitor.AMSI;
+using ClipboardMonitor.Helpers;
 using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor
@@ -19,10 +20,15 @@ namespace ClipboardMonitor
             _amsiSession = _amsiContext.CreateSession();
         }
 
-        public Alert Scan(string content)
+        public Alert? Scan(string content)
         {
             // The logic comes from Eric Lawrence's article: https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/
             var processSummary = ProcessHelper.GetClipboardOwnerProcess();
+
+            if (processSummary == null)
+            {
+                return null;
+            }
 
             if (IsCopiedFromBrowser())
             {
@@ -41,7 +47,7 @@ namespace ClipboardMonitor
                 return CreatePanAlert(processSummary, searchResult);
             }
 
-            return default;
+            return null;
         }
 
         private static Alert CreateMalwareAlert(ProcessSummary processSummary, string content)
@@ -114,7 +120,7 @@ namespace ClipboardMonitor
             {
                 Title = "Suspicious PAN data detected in clipboard. Clipboard is cleared and overwritten.",
                 Detail = incidents.ToString(),
-                Payload = string.Join(", ", searchResult.Select(sr => sr.ToString()).ToArray()),
+                Payload = string.Join(", ", [.. searchResult.Select(sr => sr.ToString())]),
                 ClearClipboard = true
             };
         }

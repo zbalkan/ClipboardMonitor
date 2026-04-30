@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Windows.Forms;
 
-namespace ClipboardMonitor
+namespace ClipboardMonitor.Helpers
 {
     public static class ClipboardHelper
     {
@@ -20,12 +20,10 @@ namespace ClipboardMonitor
 
         public static void SetText(string data)
         {
-
             const int MaxRetries = 3;
             const int DelayMs = 100;
 
-            var staThread = new Thread(() =>
-            {
+            var staThread = new Thread(() => {
                 for (var i = 0; i < MaxRetries; i++)
                 {
                     try
@@ -63,7 +61,6 @@ namespace ClipboardMonitor
                                 returnValue = true;
                             }
                         }
-
                     }
                 });
             staThread.SetApartmentState(ApartmentState.STA);

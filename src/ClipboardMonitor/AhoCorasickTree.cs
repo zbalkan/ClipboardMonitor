@@ -43,7 +43,7 @@ namespace ClipboardMonitor
             {
                 while (true)
                 {
-                    var node = currentNode.GetNode(text[i]);
+                    var node = currentNode!.GetNode(text[i]);
                     if (node == null)
                     {
                         currentNode = currentNode.Failure;
@@ -69,7 +69,7 @@ namespace ClipboardMonitor
         }
 
         // todo copy paste from Contains method: Refactor!
-        // todo check performance 
+        // todo check performance
         public IEnumerable<KeyValuePair<string, int>> Search(string text)
         {
             var currentNode = _rootNode;
@@ -79,7 +79,7 @@ namespace ClipboardMonitor
             {
                 while (true)
                 {
-                    var node = currentNode.GetNode(text[i]);
+                    var node = currentNode!.GetNode(text[i]);
                     if (node == null)
                     {
                         currentNode = currentNode.Failure;
@@ -143,9 +143,9 @@ namespace ClipboardMonitor
                     continue;
                 }
 
-                var failure = currentNode.Parent.Failure;
+                var failure = currentNode!.Parent!.Failure;
                 var key = currentNode.Key;
-                while (failure.GetNode(key) == null && failure != _rootNode)
+                while (failure!.GetNode(key) == null && failure != _rootNode)
                 {
                     failure = failure.Failure;
                 }
@@ -171,8 +171,8 @@ namespace ClipboardMonitor
 
         private class AhoCorasickTreeNode
         {
-            public readonly AhoCorasickTreeNode Parent;
-            public AhoCorasickTreeNode Failure;
+            public readonly AhoCorasickTreeNode? Parent;
+            public AhoCorasickTreeNode? Failure;
             public bool IsFinished;
             public List<string> Results;
             public readonly char Key;
@@ -186,17 +186,17 @@ namespace ClipboardMonitor
             {
             }
 
-            private AhoCorasickTreeNode(AhoCorasickTreeNode parent, char key)
+            private AhoCorasickTreeNode(AhoCorasickTreeNode? parent, char key)
             {
                 Key = key;
                 Parent = parent;
 
-                _buckets = new int[0];
-                _entries = new Entry[0];
-                Results = new List<string>();
+                _buckets = [];
+                _entries = [];
+                Results = [];
             }
 
-            public AhoCorasickTreeNode[] Nodes => _entries.Select(x => x.Value).ToArray();
+            public AhoCorasickTreeNode[] Nodes => [.. _entries.Select(x => x.Value)];
 
             public AhoCorasickTreeNode AddNode(char key)
             {
@@ -215,7 +215,7 @@ namespace ClipboardMonitor
                 return node;
             }
 
-            public AhoCorasickTreeNode GetNode(char key)
+            public AhoCorasickTreeNode? GetNode(char key)
             {
                 if (_count == 0)
                 {

@@ -1,14 +1,14 @@
+using System;
 using ClipboardMonitor.AMSI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace ClipboardMonitor.Tests
 {
     [TestClass]
     public class AmsiTests
     {
-        private AmsiContext _context;
-        private AmsiSession _session;
+        private AmsiContext? _context = null;
+        private AmsiSession? _session = null;
         private bool _skip;
 
         [TestInitialize]
@@ -33,8 +33,8 @@ namespace ClipboardMonitor.Tests
                 return;
             }
 
-            _session.Dispose();
-            _context.Dispose();
+            _session?.Dispose();
+            _context?.Dispose();
         }
 
         [TestMethod]
@@ -45,9 +45,9 @@ namespace ClipboardMonitor.Tests
                 Assert.Inconclusive("Skipping AMSI test on CI (Defender not available)");
             }
 
-            Assert.IsTrue(_session.IsMalware(
+            Assert.IsTrue(_session?.IsMalware(
                 @"X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*",
-                "EICAR"));
+                "EICAR") ?? false);
         }
 
         [TestMethod]
@@ -58,7 +58,7 @@ namespace ClipboardMonitor.Tests
                 Assert.Inconclusive("Skipping AMSI test on CI (Defender not available)");
             }
 
-            Assert.IsFalse(_session.IsMalware("0000", "EICAR"));
+            Assert.IsFalse(_session?.IsMalware("0000", "EICAR") ?? false);
         }
     }
 }

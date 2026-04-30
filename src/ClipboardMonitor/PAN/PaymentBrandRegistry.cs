@@ -15,7 +15,7 @@ namespace ClipboardMonitor.PAN
         private readonly List<IPaymentBrand> _paymentBrands;
 
         private static readonly Lazy<PaymentBrandRegistry> LazyInstance =
-            new Lazy<PaymentBrandRegistry>(() => new PaymentBrandRegistry());
+            new(() => new PaymentBrandRegistry());
 
         /// <summary>
         /// Gets the singleton instance of the <see cref="PaymentBrandRegistry"/>.
@@ -29,13 +29,12 @@ namespace ClipboardMonitor.PAN
 
         private PaymentBrandRegistry()
         {
-            _paymentBrands = Assembly.GetExecutingAssembly()
+            _paymentBrands = [.. Assembly.GetExecutingAssembly()
                 .GetTypes()
                 .Where(t => typeof(IPaymentBrand).IsAssignableFrom(t)
                             && !t.IsInterface
                             && !t.IsAbstract)
-                .Select(t => (IPaymentBrand)Activator.CreateInstance(t))
-                .ToList();
+                .Select(t => (IPaymentBrand)Activator.CreateInstance(t))];
         }
     }
 }

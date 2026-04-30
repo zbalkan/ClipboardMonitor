@@ -1,5 +1,4 @@
 using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
@@ -11,7 +10,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Amex()
         {
             const string cardNumber = "371449635398431";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Amex", pans[0].PaymentBrand);
         }
@@ -38,7 +37,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Amex_EmbeddedInText()
         {
             const string text = "Transaction ID: X123, Card=371449635398431;";
-            _ =  PANHelper.TryParse(text, out var pans);
+            _ = PANHelper.TryParse(text, out var pans);
 
             Assert.AreEqual("Amex", pans[0].PaymentBrand);
         }
@@ -49,7 +48,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "37144963539843"; // 14 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -58,7 +57,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "361449635398431"; // Diners Club prefix
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -67,7 +66,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3714a49635398431";
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -76,7 +75,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3714496353984310"; // 16 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
     }
 }

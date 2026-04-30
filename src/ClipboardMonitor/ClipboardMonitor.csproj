@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net481-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net481</TargetFramework>
     <!-- Hybrid Support -->
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>

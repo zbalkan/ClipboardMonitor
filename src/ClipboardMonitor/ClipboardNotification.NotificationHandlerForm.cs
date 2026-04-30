@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows.Forms;
 using ClipboardMonitor.Helpers;
 using Windows.UI.Notifications;
@@ -12,7 +13,10 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly Scanner _scanner;
-            private readonly string _appId;
+            private static string _appId;
+
+            private static readonly string IconPath = ExtractEmbeddedAsset("icon.png");
+            private static readonly string IconInvertedPath = ExtractEmbeddedAsset("icon-inverted.png");
 
             public NotificationHandlerForm(string appId)
             {
@@ -32,10 +36,29 @@ namespace ClipboardMonitor
                 var textNodes = xml.GetElementsByTagName("text");
                 textNodes[0].InnerText = message;
                 var iconNodes = xml.GetElementsByTagName("image");
-                var iconPath = DarkModeHelper.IsDarkModeEnabled() ? Path.GetFullPath("Assets/icon-inverted.png") : Path.GetFullPath("Assets/icon.png");
-                iconNodes[0].Attributes.GetNamedItem("src").NodeValue = iconPath;
+                var iconPath = DarkModeHelper.IsDarkModeEnabled() ? IconInvertedPath : IconPath;
+                iconNodes[0].Attributes.GetNamedItem("src").NodeValue = new Uri(iconPath).AbsoluteUri;
                 var toast = new ToastNotification(xml);
                 ToastNotificationManager.CreateToastNotifier(_appId).Show(toast);
+            }
+
+
+            private static string ExtractEmbeddedAsset(string fileName)
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = $"{assembly.GetName().Name}.Assets.{fileName}";
+
+                using var stream = assembly.GetManifestResourceStream(resourceName)
+                    ?? throw new InvalidOperationException($"Embedded resource '{resourceName}' was not found.");
+
+                var outputDir = Path.Combine(Path.GetTempPath(), assembly.GetName().Name ?? "ClipboardMonitor", "Assets");
+                Directory.CreateDirectory(outputDir);
+                var outputPath = Path.Combine(outputDir, fileName);
+
+                using var file = File.Create(outputPath);
+                stream.CopyTo(file);
+
+                return outputPath;
             }
 
             protected override void WndProc(ref Message m)

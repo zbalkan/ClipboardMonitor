@@ -55,7 +55,7 @@ namespace ClipboardMonitor
 
             if (IsArgumentCountInvalid(args))
             {
-                throw new ArgumentException($"Invalid arguments.{args[2]}");
+                throw new ArgumentException($"Invalid arguments: {string.Join(" ", args)}");
             }
 
             if (IsNormalStart(args))
@@ -127,7 +127,7 @@ namespace ClipboardMonitor
             }
             else
             {
-                throw new ArgumentException($"Invalid arguments.{args[2]}");
+                throw new ArgumentException($"Invalid arguments: {string.Join(" ", args)}");
             }
         }
 
@@ -213,6 +213,7 @@ namespace ClipboardMonitor
             {
                 ProcessHelper.Uncover();
                 _notification?.Dispose();
+                _riskMonitor?.Dispose();
             }
 
             _disposedValue = true;

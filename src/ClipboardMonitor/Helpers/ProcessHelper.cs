@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 
 namespace ClipboardMonitor.Helpers
 {
@@ -15,13 +16,23 @@ namespace ClipboardMonitor.Helpers
         private static bool _isProtected;
         private static readonly System.Threading.Lock CoverSync = new();
         private static RawSecurityDescriptor? _originalDacl;
+        private const string MutexName = @"Local\ClipboardMonitor_Singleton";
+        private static Mutex? _singleInstanceMutex;
 
         public static bool IsDuplicate()
         {
-            var processName = Process.GetCurrentProcess().ProcessName;
-            var count = Process.GetProcesses().Count(p => p.ProcessName == processName);
-
-            return count > 1;
+            var createdNew = false;
+            try
+            {
+                _singleInstanceMutex ??= new Mutex(initiallyOwned: true, name: MutexName, createdNew: out createdNew);
+                return !createdNew;
+            }
+            catch
+            {
+                var processName = Process.GetCurrentProcess().ProcessName;
+                var count = Process.GetProcesses().Count(p => p.ProcessName == processName);
+                return count > 1;
+            }
         }
 
         public static ProcessSummary? GetClipboardOwnerProcess()
@@ -66,6 +77,7 @@ namespace ClipboardMonitor.Helpers
                 }
                 catch (Exception)
                 {
+                    Logger.Instance.LogInfo("Unable to read process MainModule.FileName for clipboard owner process.", 36);
                 }
 
                 // Get main module
@@ -77,6 +89,7 @@ namespace ClipboardMonitor.Helpers
                 }
                 catch (Exception)
                 {
+                    Logger.Instance.LogInfo("Unable to read process MainModule.ModuleName for clipboard owner process.", 37);
                 }
 
                 // Create the struct that carries basic info

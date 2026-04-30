@@ -20,8 +20,11 @@ namespace ClipboardMonitor
         private static string _riskContent = string.Empty;
         private static long _riskUtcTicks;
         private static long _lastWinXUtcTicks;
+        private static long _lastAlertUtcTicks;
+        private static int _alertDispatchInProgress;
         private static IntPtr _winEventHookForeground = IntPtr.Zero;
         private static IntPtr _keyboardHook = IntPtr.Zero;
+        private static readonly TimeSpan AlertCooldown = TimeSpan.FromSeconds(5);
         private static ProcessSummary? BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
         private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
 
@@ -74,6 +77,51 @@ namespace ClipboardMonitor
         private static bool IsRecentRisk() =>
             DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
 
+        private static bool CanDispatchAlert()
+        {
+            var nowTicks = DateTime.UtcNow.Ticks;
+            var sinceLastAlert = nowTicks - Volatile.Read(ref _lastAlertUtcTicks);
+            if (sinceLastAlert < AlertCooldown.Ticks)
+            {
+                return false;
+            }
+
+            return Interlocked.CompareExchange(ref _alertDispatchInProgress, 1, 0) == 0;
+        }
+
+        private static void DispatchAlertAsync()
+        {
+            if (!CanDispatchAlert())
+            {
+                return;
+            }
+
+            var snapshotProcessSummary = BrowserProcessSummary;
+            var snapshotContent = CurrentRiskContent;
+
+            if (snapshotProcessSummary == default || string.IsNullOrWhiteSpace(snapshotContent))
+            {
+                Interlocked.Exchange(ref _alertDispatchInProgress, 0);
+                return;
+            }
+
+            _ = Task.Run(() => {
+                try
+                {
+                    _registeredAction?.Invoke(snapshotProcessSummary, snapshotContent);
+                    Volatile.Write(ref _lastAlertUtcTicks, DateTime.UtcNow.Ticks);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"PasteGuard alert action failed.\n{ex}", 34);
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref _alertDispatchInProgress, 0);
+                }
+            });
+        }
+
         private static bool IsWindowsKeyPressed() =>
             (NativeMethods.GetKeyState(NativeMethods.VK_LWIN) & 0x8000) != 0 ||
             (NativeMethods.GetKeyState(NativeMethods.VK_RWIN) & 0x8000) != 0;
@@ -92,12 +140,7 @@ namespace ClipboardMonitor
                     var ticksSinceWinX = DateTime.UtcNow.Ticks - Volatile.Read(ref _lastWinXUtcTicks);
                     if (ticksSinceWinX <= Window.Ticks && IsRecentRisk())
                     {
-                        _ = Task.Run(() => {
-                            if (BrowserProcessSummary != null)
-                            {
-                                _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent);
-                            }
-                        });
+                        DispatchAlertAsync();
                     }
                 }
             }
@@ -142,17 +185,12 @@ namespace ClipboardMonitor
                             return;
                         }
 
-                        _ = Task.Run(() => {
-                            if (BrowserProcessSummary != null)
-                            {
-                                _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent);
-                            }
-                        });
+                        DispatchAlertAsync();
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // process may have exited, ignore
+                    Logger.Instance.LogInfo($"PasteGuard window correlation skipped due to process lookup failure.\n{ex.Message}", 35);
                 }
             }
         }

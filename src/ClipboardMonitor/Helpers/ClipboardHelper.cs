@@ -67,9 +67,10 @@ namespace ClipboardMonitor.Helpers
                         var dob = new DataObject(data);
                         foreach (var f in dob.GetFormats(true))
                         {
-                            if (format.Equals(f))
+                            if (format.Equals(f, StringComparison.Ordinal))
                             {
                                 returnValue = true;
+                                break;
                             }
                         }
                     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using ClipboardMonitor.PAN;
 
@@ -35,14 +34,12 @@ namespace ClipboardMonitor
 
         private void WarningAction(ProcessSummary processSummary, string content)
         {
-            Task.Run(() =>
-                MessageBox.Show($"Do not paste web content into the Run dialog unless you fully trust the source.\nCopied content:\n\n{content}",
-                                "Danger!",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Warning,
-                                MessageBoxDefaultButton.Button1,
-                                MessageBoxOptions.ServiceNotification)
-            );
+            MessageBox.Show($"Do not paste web content into the Run dialog unless you fully trust the source.\nCopied content:\n\n{content}",
+                            "Danger!",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning,
+                            MessageBoxDefaultButton.Button1,
+                            MessageBoxOptions.ServiceNotification);
 
             var incidents = new StringBuilder(500);
             incidents.AppendLine("Detected Run dialog following suspicious text copied from browser.");

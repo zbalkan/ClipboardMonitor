@@ -91,7 +91,7 @@ Open the solution in Visual Studio with the **.NET Desktop Development** workloa
 ## Acknowledgements
 
 - **Tim MalcomVetter** for [UnstoppableService](https://github.com/malcomvetter/UnstoppableService), which inspired parts of the bootstrap approach (this project is not installed as a Windows service).
-- **Gérald Barré (Meziantou)** for the [Using Windows AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
+- **GÃ©rald BarrÃ© (Meziantou)** for the [Using Windows AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
 - **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
 
 ## Icon attribution

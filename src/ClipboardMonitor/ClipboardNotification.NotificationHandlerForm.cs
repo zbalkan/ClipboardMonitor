@@ -39,30 +39,38 @@ namespace ClipboardMonitor
 
             protected override void WndProc(ref Message m)
             {
-                //Listen for operating system messages
-                if (m.Msg == WM_CLIPBOARDUPDATE)
+                try
                 {
-                    //Get the date and time for the current moment expressed as coordinated universal time (UTC).
-                    var saveUtcNow = DateTime.UtcNow;
-                    Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
-
-                    //Write to stdout clipboard contents
-                    var content = ClipboardHelper.GetText();
-
-                    // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
-                    if (string.IsNullOrEmpty(content) || AlertHandler.Instance.SubstituteText.Equals(content))
+                    //Listen for operating system messages
+                    if (m.Msg == WM_CLIPBOARDUPDATE)
                     {
-                        return;
-                    }
+                        //Get the date and time for the current moment expressed as coordinated universal time (UTC).
+                        var saveUtcNow = DateTime.UtcNow;
+                        Debug.WriteLine("Copy event detected at {0} (UTC)!", saveUtcNow);
 
-                    var alert = _scanner.Scan(content);
-                    if (alert == default)
-                    {
-                        return;
+                        //Write to stdout clipboard contents
+                        var content = ClipboardHelper.GetText();
+
+                        // The clipboard content can be something else than plain text, e.g. images, binary files, Office shapes and diagrams, etc.
+                        if (string.IsNullOrEmpty(content) || AlertHandler.Instance.SubstituteText.Equals(content))
+                        {
+                            return;
+                        }
+
+                        var alert = _scanner.Scan(content);
+                        if (alert == default)
+                        {
+                            return;
+                        }
+                        AlertHandler.Instance.InvokeAlert(alert);
+                        SendNotification(alert.Title + "\n\nThe incident is logged.");
                     }
-                    AlertHandler.Instance.InvokeAlert(alert);
-                    SendNotification(alert.Title + "\n\nThe incident is logged.");
                 }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError($"Exception while processing clipboard update.\n{ex}", 32);
+                }
+
                 //Called for any unhandled messages
                 base.WndProc(ref m);
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,6 +11,7 @@ namespace ClipboardMonitor
     {
         private const int LAST_N_SECONDS = 30;
         private static readonly NativeMethods.WinEventDelegate _winEventProc = WinEventCallback;
+        private static readonly NativeMethods.LowLevelKeyboardProc _keyboardProc = KeyboardHookCallback;
         private static readonly TimeSpan Window = TimeSpan.FromSeconds(LAST_N_SECONDS);
 
         private static IntPtr _lastRunDialog = IntPtr.Zero;
@@ -17,7 +19,9 @@ namespace ClipboardMonitor
         private static Action<ProcessSummary, string> _registeredAction;
         private static string _riskContent = string.Empty;
         private static long _riskUtcTicks;
+        private static long _lastWinXUtcTicks;
         private static IntPtr _winEventHookForeground = IntPtr.Zero;
+        private static IntPtr _keyboardHook = IntPtr.Zero;
         private static ProcessSummary BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
         private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
 
@@ -27,6 +31,11 @@ namespace ClipboardMonitor
             {
                 _winEventHookForeground = NativeMethods.SetWinEventHook(NativeMethods.EVENT_SYSTEM_FOREGROUND, NativeMethods.EVENT_SYSTEM_FOREGROUND,
                     IntPtr.Zero, _winEventProc, 0, 0, NativeMethods.WINEVENT_OUTOFCONTEXT);
+            }
+
+            if (_keyboardHook == IntPtr.Zero)
+            {
+                _keyboardHook = NativeMethods.SetWindowsHookEx(NativeMethods.WH_KEYBOARD_LL, _keyboardProc, IntPtr.Zero, 0);
             }
         }
 
@@ -39,6 +48,13 @@ namespace ClipboardMonitor
             {
                 NativeMethods.UnhookWinEvent(_winEventHookForeground);
                 _winEventHookForeground = IntPtr.Zero;
+            }
+
+
+            if (_keyboardHook != IntPtr.Zero)
+            {
+                NativeMethods.UnhookWindowsHookEx(_keyboardHook);
+                _keyboardHook = IntPtr.Zero;
             }
         }
 
@@ -58,6 +74,32 @@ namespace ClipboardMonitor
 
         private static bool IsRecentRisk() =>
             DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
+
+        private static bool IsWindowsKeyPressed() =>
+            (NativeMethods.GetKeyState(NativeMethods.VK_LWIN) & 0x8000) != 0 ||
+            (NativeMethods.GetKeyState(NativeMethods.VK_RWIN) & 0x8000) != 0;
+
+        private static IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0 && wParam == (IntPtr)NativeMethods.WM_KEYDOWN)
+            {
+                var vkCode = Marshal.ReadInt32(lParam);
+                if (vkCode == NativeMethods.VK_X && IsWindowsKeyPressed())
+                {
+                    Volatile.Write(ref _lastWinXUtcTicks, DateTime.UtcNow.Ticks);
+                }
+                else if (vkCode == NativeMethods.VK_I)
+                {
+                    var ticksSinceWinX = DateTime.UtcNow.Ticks - Volatile.Read(ref _lastWinXUtcTicks);
+                    if (ticksSinceWinX <= Window.Ticks && IsRecentRisk())
+                    {
+                        Task.Run(() => _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent));
+                    }
+                }
+            }
+
+            return NativeMethods.CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
+        }
 
         private static void WinEventCallback(
              IntPtr hWinEventHook,
@@ -82,7 +124,6 @@ namespace ClipboardMonitor
                     using (var proc = Process.GetProcessById((int)pid))
                     {
                         var exeName = proc.ProcessName;
-                        var exePath = proc.MainModule?.FileName ?? string.Empty;
 
                         if (exeName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
                         {

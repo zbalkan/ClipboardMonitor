@@ -9,7 +9,13 @@ namespace ClipboardMonitor
     {
 
         internal const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
-
+        internal const int WH_KEYBOARD_LL = 13;
+        internal const int WM_KEYDOWN = 0x0100;
+        internal const int VK_CONTROL = 0x11;
+        internal const int VK_X = 0x58;
+        internal const int VK_I = 0x49;
+        internal const int VK_LWIN = 0x5B;
+        internal const int VK_RWIN = 0x5C;
         internal const uint WINEVENT_OUTOFCONTEXT = 0;
 
         internal delegate void WinEventDelegate(
@@ -20,6 +26,8 @@ namespace ClipboardMonitor
                                             int idChild,
                                             uint dwEventThread,
                                             uint dwmsEventTime);
+
+        internal delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
         #region advapi32.dll
 
@@ -91,6 +99,23 @@ namespace ClipboardMonitor
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern short GetKeyState(int nVirtKey);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
         #endregion user32.dll
 
         #region shell32.dll

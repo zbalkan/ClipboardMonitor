@@ -16,8 +16,19 @@ namespace ClipboardMonitor
 
         public static void NotifyPasteGuard(ProcessSummary processSummary, string content)
         {
-            var masked =
-                content.Length > 200 ? PANHelper.Mask(content.Substring(0, 200)) : PANHelper.Mask(content);
+            var candidate = content.Length > 200 ? content.Substring(0, 200) : content;
+            var masked = candidate;
+
+            try
+            {
+                masked = PANHelper.Mask(candidate);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError($"PAN masking failed while preparing paste-guard correlation content.\n{ex}", 31);
+            }
+
+
             PasteGuard.SetSuspiciousActivityContent(processSummary, masked);
         }
 

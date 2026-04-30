@@ -1,0 +1,74 @@
+name: PR Tests
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/*.props'
+      - '**/*.targets'
+      - '**/*.config'
+      - '**/packages.config'
+      - '**/global.json'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/Directory.Packages.props'
+      - '**/nuget.config'
+      - '.github/workflows/pr-tests.yml'
+
+  push:
+    branches:
+      - master
+    paths:
+      - '**/*.cs'
+      - '**/*.csproj'
+      - '**/*.sln'
+      - '**/*.slnx'
+      - '**/*.props'
+      - '**/*.targets'
+      - '**/*.config'
+      - '**/packages.config'
+      - '**/global.json'
+      - '**/Directory.Build.props'
+      - '**/Directory.Build.targets'
+      - '**/Directory.Packages.props'
+      - '**/nuget.config'
+      - '.github/workflows/pr-tests.yml'
+
+  workflow_dispatch:
+  
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v4
+
+      - name: Restore packages
+        run: nuget restore src/ClipboardMonitor.sln
+
+      - name: Build solution (Release)
+        run: msbuild src/ClipboardMonitor.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+
+      - name: Run unit tests
+        run: dotnet test src/ClipboardMonitor.Tests/ClipboardMonitor.Tests.csproj --configuration Release --no-build --logger "trx;LogFileName=results.trx" --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: ignore

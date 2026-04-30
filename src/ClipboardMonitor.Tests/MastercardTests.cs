@@ -1,5 +1,4 @@
 ﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
@@ -11,7 +10,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Mastercard()
         {
             const string cardNumber = "5105105105105100"; // Classic 51 prefix
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Mastercard", pans[0].PaymentBrand);
         }
@@ -20,7 +19,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Mastercard_WithDashes()
         {
             const string cardNumber = "5105-1051-0510-5100";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Mastercard", pans[0].PaymentBrand);
         }
@@ -29,7 +28,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Mastercard_WithSpaces()
         {
             const string cardNumber = "5105 1051 0510 5100";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Mastercard", pans[0].PaymentBrand);
         }
@@ -47,11 +46,10 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Mastercard_2Series()
         {
             const string cardNumber = "2221000000000009"; // Lower bound of 2-series
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Mastercard", pans[0].PaymentBrand);
         }
-
 
         [TestMethod]
         public void Test_PAN_Invalid_Mastercard_WrongLength_Short()

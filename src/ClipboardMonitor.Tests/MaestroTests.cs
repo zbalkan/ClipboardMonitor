@@ -1,5 +1,4 @@
 ﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
@@ -11,7 +10,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_5018()
         {
             const string cardNumber = "501883388073561126";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -20,7 +19,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_5020()
         {
             const string cardNumber = "5020290416621666007";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -29,7 +28,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_5038()
         {
             const string cardNumber = "5038309169337926360";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -38,7 +37,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_5893()
         {
             const string cardNumber = "5893300725462249";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -47,7 +46,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6304()
         {
             const string cardNumber = "63040459290493947";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -56,7 +55,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6759()
         {
             const string cardNumber = "6759649826438453";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -65,7 +64,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6761()
         {
             const string cardNumber = "6761000000000006";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -74,7 +73,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6762()
         {
             const string cardNumber = "6762018936274528";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -83,7 +82,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6763()
         {
             const string cardNumber = "6763774571716764";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -92,7 +91,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6771()
         {
             const string cardNumber = "6771798021000016";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -101,7 +100,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_6761_WithSpaces()
         {
             const string cardNumber = "6761 5897 7391 4468";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }
@@ -110,7 +109,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Maestro_WithDashes()
         {
             const string cardNumber = "6759-6498-2643-8453";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Maestro", pans[0].PaymentBrand);
         }

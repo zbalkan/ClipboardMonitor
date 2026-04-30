@@ -18,7 +18,6 @@ namespace ClipboardMonitor
         private PasteGuardWrapper? _riskMonitor;
         private bool _disposedValue;
 
-
         [STAThread]
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -48,7 +47,6 @@ namespace ClipboardMonitor
 
             _notification = new ClipboardNotification();
             _riskMonitor = new PasteGuardWrapper();
-
         }
 
         private static void HandleArguments()

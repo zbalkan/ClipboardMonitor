@@ -5,5 +5,4 @@
              ShutdownMode="OnExplicitShutdown"
              SessionEnding="OnSessionEnding"
              Exit="OnExit">
-
 </Application>

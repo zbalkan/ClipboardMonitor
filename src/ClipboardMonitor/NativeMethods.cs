@@ -7,7 +7,6 @@ namespace ClipboardMonitor
 {
     internal static class NativeMethods
     {
-
         internal const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
         internal const int WH_KEYBOARD_LL = 13;
         internal const int WM_KEYDOWN = 0x0100;
@@ -100,7 +99,6 @@ namespace ClipboardMonitor
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool UnhookWinEvent(IntPtr hWinEventHook);
 
-
         [DllImport("user32.dll", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern short GetKeyState(int nVirtKey);
@@ -116,15 +114,19 @@ namespace ClipboardMonitor
         [DllImport("user32.dll", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
         #endregion user32.dll
 
         #region shell32.dll
+
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern int SetCurrentProcessExplicitAppUserModelID(string appID);
+
         #endregion shell32.dll
 
         #region Amsi.dll
+
         // Based on Meziantou's samples at <see href="https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm"/>.
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [DllImport("Amsi.dll", EntryPoint = "AmsiInitialize", CallingConvention = CallingConvention.StdCall)]
@@ -149,6 +151,7 @@ namespace ClipboardMonitor
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         [DllImport("Amsi.dll", EntryPoint = "AmsiScanBuffer", CallingConvention = CallingConvention.StdCall)]
         internal static extern int AmsiScanBuffer(AmsiContextSafeHandle amsiContext, byte[] buffer, uint length, string contentName, AmsiSessionSafeHandle session, out AmsiResult result);
+
         #endregion Amsi.dll
     }
 }

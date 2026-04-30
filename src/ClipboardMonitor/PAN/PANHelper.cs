@@ -66,7 +66,6 @@ namespace ClipboardMonitor.PAN
             if (brands.Count == 0)
             {
                 return false;
-
             }
 
             foreach (var brand in brands)

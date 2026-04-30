@@ -1,6 +1,6 @@
+using System;
 using ClipboardMonitor.AMSI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace ClipboardMonitor.Tests
 {

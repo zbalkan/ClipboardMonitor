@@ -28,7 +28,6 @@ namespace ClipboardMonitor
                 Logger.Instance.LogError($"PAN masking failed while preparing paste-guard correlation content.\n{ex}", 31);
             }
 
-
             PasteGuard.SetSuspiciousActivityContent(processSummary, masked);
         }
 

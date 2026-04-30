@@ -13,11 +13,11 @@ namespace ClipboardMonitor
         {
             private readonly Scanner _scanner;
             private static string? _appId;
+
             public NotificationHandlerForm(string appId)
             {
                 _appId = appId;
                 _scanner = new Scanner();
-
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)
                 NativeMethods.SetParent(Handle, HWND_MESSAGE);
@@ -77,6 +77,7 @@ namespace ClipboardMonitor
             }
 
             #region Dispose
+
             protected override void Dispose(bool disposing)
             {
                 NativeMethods.RemoveClipboardFormatListener(Handle);

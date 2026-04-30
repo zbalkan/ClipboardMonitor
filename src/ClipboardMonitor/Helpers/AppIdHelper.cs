@@ -5,7 +5,6 @@ namespace ClipboardMonitor.Helpers
 {
     internal static class AppIdHelper
     {
-
         internal static string EnsureAppId()
         {
             var asm = Assembly.GetExecutingAssembly();

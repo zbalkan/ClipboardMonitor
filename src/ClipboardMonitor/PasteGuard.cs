@@ -50,7 +50,6 @@ namespace ClipboardMonitor
                 _winEventHookForeground = IntPtr.Zero;
             }
 
-
             if (_keyboardHook != IntPtr.Zero)
             {
                 NativeMethods.UnhookWindowsHookEx(_keyboardHook);

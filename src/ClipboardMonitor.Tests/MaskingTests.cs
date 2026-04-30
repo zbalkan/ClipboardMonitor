@@ -1,7 +1,6 @@
-﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
+﻿using System;
+using ClipboardMonitor.PAN;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 
 namespace ClipboardMonitor.Tests
 {
@@ -36,8 +35,8 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         public void Test_Mask_Null_Throws() => Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(null));
+
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         [TestMethod]

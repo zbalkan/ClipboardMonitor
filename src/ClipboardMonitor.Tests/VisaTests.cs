@@ -1,5 +1,4 @@
 ﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
@@ -11,7 +10,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Visa_13Digits()
         {
             const string cardNumber = "4222222222222"; // 13-digit Visa
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Visa", pans[0].PaymentBrand);
         }
@@ -20,7 +19,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Visa_16Digits()
         {
             const string cardNumber = "4012888888881881";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Visa", pans[0].PaymentBrand);
         }
@@ -29,7 +28,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Visa_19Digits()
         {
             const string cardNumber = "4444333322221111455"; // 19-digit Visa
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Visa", pans[0].PaymentBrand);
         }
@@ -38,7 +37,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Visa_WithDashes()
         {
             const string cardNumber = "4012-8888-8888-1881";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Visa", pans[0].PaymentBrand);
         }
@@ -47,7 +46,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Visa_WithSpaces()
         {
             const string cardNumber = "4012 8888 8888 1881";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("Visa", pans[0].PaymentBrand);
         }

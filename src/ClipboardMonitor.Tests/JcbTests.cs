@@ -1,5 +1,4 @@
 ﻿using ClipboardMonitor.PAN;
-using ClipboardMonitor.PaymentBrands;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ClipboardMonitor.Tests
@@ -11,7 +10,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Jcb_16Digits()
         {
             const string cardNumber = "3530111333300000"; // Valid JCB
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("JCB", pans[0].PaymentBrand);
         }
@@ -20,7 +19,7 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Jcb_16Digits_WithDashes()
         {
             const string cardNumber = "3530-1113-3330-0000";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("JCB", pans[0].PaymentBrand);
         }
@@ -29,13 +28,13 @@ namespace ClipboardMonitor.Tests
         public void Test_PAN_Valid_Jcb_16Digits_WithSpaces()
         {
             const string cardNumber = "3530 1113 3330 0000";
-            _  = PANHelper.TryParse(cardNumber, out var pans);
+            _ = PANHelper.TryParse(cardNumber, out var pans);
 
             Assert.AreEqual("JCB", pans[0].PaymentBrand);
         }
 
         //[TestMethod]
-        
+
         //public void Test_PAN_Valid_Jcb_19Digits()
         //{
         //    const string cardNumber = ""; // 19-digit JCB test number needed

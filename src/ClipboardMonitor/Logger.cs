@@ -21,7 +21,6 @@ namespace ClipboardMonitor
         private readonly BlockingCollection<LogItem> _queue =
             new(boundedCapacity: 1024);
 
-        private readonly StringBuilder _sb = new(256);
         private readonly string _username;
         private readonly Task _worker;
         private volatile bool _disposed;
@@ -115,7 +114,7 @@ namespace ClipboardMonitor
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(Logger));
+                return;
             }
 
             if (string.IsNullOrWhiteSpace(message))
@@ -133,14 +132,14 @@ namespace ClipboardMonitor
 
         private string Enrich(string msg)
         {
-            _sb.Clear();
-            _sb.Append("Local Time: ").AppendLine(DateTime.Now.ToString("O"))
+            var sb = new StringBuilder(256);
+            sb.Append("Local Time: ").AppendLine(DateTime.Now.ToString("O"))
                 .Append("UTC Time: ").AppendLine(DateTime.UtcNow.ToString("O"))
                 .Append("User: ").AppendLine(_username)
                 .AppendLine("Details: ")
                 .AppendLine(msg)
                 .AppendLine();
-            return _sb.ToString();
+            return sb.ToString();
         }
 
         private void TryWrite(LogItem item)

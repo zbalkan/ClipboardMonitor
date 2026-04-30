@@ -13,6 +13,8 @@ namespace ClipboardMonitor.Helpers
         private const int DACL_SECURITY_INFORMATION = 0x00000004;
 
         private static bool _isProtected;
+        private static readonly System.Threading.Lock CoverSync = new();
+        private static RawSecurityDescriptor? _originalDacl;
 
         public static bool IsDuplicate()
         {
@@ -135,45 +137,58 @@ namespace ClipboardMonitor.Helpers
         /// </summary>
         public static void Cover()
         {
-            // Get the current process handle
-            var hProcess = Process.GetCurrentProcess().Handle;
+            using (CoverSync.EnterScope())
+            {
+                if (_isProtected)
+                {
+                    return;
+                }
 
-            // Read the DACL
-            var dacl = GetProcessSecurityDescriptor(hProcess);
+                // Get the current process handle
+                var hProcess = Process.GetCurrentProcess().Handle;
 
-            // Modify Users ACE
-            var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessDenied,
-                (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
-                false, null);
-            dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
+                // Read and snapshot DACL
+                var dacl = GetProcessSecurityDescriptor(hProcess);
+                _originalDacl = CloneDescriptor(dacl);
 
-            // Save the DACL
-            SetProcessSecurityDescriptor(hProcess, dacl);
-            _isProtected = true;
+                // Modify Users ACE
+                var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessDenied,
+                    (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+                    false, null);
+                dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
+
+                // Save the DACL
+                SetProcessSecurityDescriptor(hProcess, dacl);
+                _isProtected = true;
+            }
         }
 
         public static void Uncover()
         {
-            if (!_isProtected)
+            using (CoverSync.EnterScope())
             {
-                return;
+                if (!_isProtected)
+                {
+                    return;
+                }
+
+                // Get the current process handle
+                var hProcess = Process.GetCurrentProcess().Handle;
+
+                if (_originalDacl != null)
+                {
+                    SetProcessSecurityDescriptor(hProcess, _originalDacl);
+                }
+                _originalDacl = null;
+                _isProtected = false;
             }
+        }
 
-            // Get the current process handle
-            var hProcess = Process.GetCurrentProcess().Handle;
-
-            // Read the DACL
-            var dacl = GetProcessSecurityDescriptor(hProcess);
-
-            // Modify Users ACE
-            var denyUsers = new CommonAce(AceFlags.None, AceQualifier.AccessAllowed,
-                (int)ProcessAccessRights.PROCESS_ALL_ACCESS, new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
-                false, null);
-            dacl.DiscretionaryAcl?.InsertAce(0, denyUsers);
-
-            // Save the DACL
-            SetProcessSecurityDescriptor(hProcess, dacl);
-            _isProtected = false;
+        private static RawSecurityDescriptor CloneDescriptor(RawSecurityDescriptor source)
+        {
+            var binary = new byte[source.BinaryLength];
+            source.GetBinaryForm(binary, 0);
+            return new RawSecurityDescriptor(binary, 0);
         }
 
         private static RawSecurityDescriptor GetProcessSecurityDescriptor(IntPtr processHandle)

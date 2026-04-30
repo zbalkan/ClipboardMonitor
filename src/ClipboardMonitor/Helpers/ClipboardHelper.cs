@@ -20,11 +20,12 @@ namespace ClipboardMonitor.Helpers
 
         public static void SetText(string data)
         {
-            const int MaxRetries = 3;
-            const int DelayMs = 100;
+            const int maxRetries = 8;
+            const int delayMs = 100;
+            Exception? failure = null;
 
             var staThread = new Thread(() => {
-                for (var i = 0; i < MaxRetries; i++)
+                for (var i = 0; i < maxRetries; i++)
                 {
                     try
                     {
@@ -34,15 +35,25 @@ namespace ClipboardMonitor.Helpers
                     }
                     catch (System.Runtime.InteropServices.ExternalException)
                     {
-                        Thread.Sleep(DelayMs);
+                        Thread.Sleep(delayMs * (i + 1));
+                    }
+                    catch (Exception ex)
+                    {
+                        failure = ex;
+                        return;
                     }
                 }
-                throw new TimeoutException("Unable to overwrite the clipboard after 3 retries (300 ms total).");
+                failure = new TimeoutException($"Unable to overwrite the clipboard after {maxRetries} retries.");
             });
 
             staThread.SetApartmentState(ApartmentState.STA);
             staThread.Start();
             staThread.Join();
+
+            if (failure != null)
+            {
+                throw failure;
+            }
         }
 
         public static bool HasDataFormat(string format)

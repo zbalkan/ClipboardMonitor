@@ -16,7 +16,14 @@ namespace ClipboardMonitor
             {
                 if (alert.ClearClipboard)
                 {
-                    ClipboardHelper.SetText(SubstituteText);
+                    try
+                    {
+                        ClipboardHelper.SetText(SubstituteText);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Instance.LogError($"Failed to overwrite clipboard during alert handling.\n{ex}", 33);
+                    }
                 }
 
                 var logMessage = $"{alert.Title}\n\n{alert.Detail}";

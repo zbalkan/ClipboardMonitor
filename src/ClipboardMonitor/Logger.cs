@@ -24,6 +24,7 @@ namespace ClipboardMonitor
         private readonly string _username;
         private readonly Task _worker;
         private volatile bool _disposed;
+        private int _droppedEntries;
 
         private Logger()
         {
@@ -126,7 +127,17 @@ namespace ClipboardMonitor
 
             while (!_queue.TryAdd(item))
             {
-                _queue.TryTake(out _);
+                if (_queue.TryTake(out _))
+                {
+                    var dropped = Interlocked.Increment(ref _droppedEntries);
+                    if (dropped % 100 == 0)
+                    {
+                        TryWrite(new LogItem(
+                            EventLogEntryType.Warning,
+                            Enrich($"Logger queue dropped {dropped} entries due to high event volume."),
+                            39));
+                    }
+                }
             }
         }
 

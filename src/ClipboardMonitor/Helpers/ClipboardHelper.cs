@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -6,25 +7,28 @@ namespace ClipboardMonitor.Helpers
 {
     public static class ClipboardHelper
     {
-        public static string GetText()
-        {
-            var returnValue = string.Empty;
-            var staThread = new Thread(
-                () => returnValue = Clipboard.GetText());
-            staThread.SetApartmentState(ApartmentState.STA);
-            staThread.Start();
-            staThread.Join();
+        private static readonly BlockingCollection<Action> ClipboardActions = new();
+        private static readonly Thread ClipboardThread;
 
-            return returnValue;
+        static ClipboardHelper()
+        {
+            ClipboardThread = new Thread(ClipboardWorkerLoop)
+            {
+                IsBackground = true,
+                Name = "Clipboard STA Worker"
+            };
+            ClipboardThread.SetApartmentState(ApartmentState.STA);
+            ClipboardThread.Start();
         }
+
+        public static string GetText() => Invoke(() => Clipboard.GetText());
 
         public static void SetText(string data)
         {
             const int maxRetries = 8;
             const int delayMs = 100;
-            Exception? failure = null;
 
-            var staThread = new Thread(() => {
+            Invoke(() => {
                 for (var i = 0; i < maxRetries; i++)
                 {
                     try
@@ -37,49 +41,72 @@ namespace ClipboardMonitor.Helpers
                     {
                         Thread.Sleep(delayMs * (i + 1));
                     }
-                    catch (Exception ex)
-                    {
-                        failure = ex;
-                        return;
-                    }
                 }
-                failure = new TimeoutException($"Unable to overwrite the clipboard after {maxRetries} retries.");
+
+                throw new TimeoutException($"Unable to overwrite the clipboard after {maxRetries} retries.");
+            });
+        }
+
+        public static bool HasDataFormat(string format) => Invoke(() => {
+            var data = Clipboard.GetDataObject();
+            if (data == null)
+            {
+                return false;
+            }
+
+            var dob = new DataObject(data);
+            foreach (var f in dob.GetFormats(true))
+            {
+                if (format.Equals(f, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        private static T Invoke<T>(Func<T> action)
+        {
+            using var completed = new ManualResetEventSlim(false);
+            Exception? failure = null;
+            T? result = default;
+
+            ClipboardActions.Add(() => {
+                try
+                {
+                    result = action();
+                }
+                catch (Exception ex)
+                {
+                    failure = ex;
+                }
+                finally
+                {
+                    completed.Set();
+                }
             });
 
-            staThread.SetApartmentState(ApartmentState.STA);
-            staThread.Start();
-            staThread.Join();
-
+            completed.Wait();
             if (failure != null)
             {
                 throw failure;
             }
+
+            return result!;
         }
 
-        public static bool HasDataFormat(string format)
-        {
-            var returnValue = false;
-            var staThread = new Thread(
-                () => {
-                    var data = Clipboard.GetDataObject();
-                    if (data != null)
-                    {
-                        var dob = new DataObject(data);
-                        foreach (var f in dob.GetFormats(true))
-                        {
-                            if (format.Equals(f, StringComparison.Ordinal))
-                            {
-                                returnValue = true;
-                                break;
-                            }
-                        }
-                    }
-                });
-            staThread.SetApartmentState(ApartmentState.STA);
-            staThread.Start();
-            staThread.Join();
+        private static void Invoke(Action action) => Invoke(() => {
+            action();
+            return true;
+        });
 
-            return returnValue;
+        private static void ClipboardWorkerLoop()
+        {
+            foreach (var action in ClipboardActions.GetConsumingEnumerable())
+            {
+                action();
+            }
         }
     }
 }

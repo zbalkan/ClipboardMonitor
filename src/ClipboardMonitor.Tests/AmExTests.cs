@@ -49,7 +49,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "37144963539843"; // 14 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -58,7 +58,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "361449635398431"; // Diners Club prefix
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -67,7 +67,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3714a49635398431";
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3714496353984310"; // 16 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
     }
 }

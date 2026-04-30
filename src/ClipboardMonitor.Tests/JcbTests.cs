@@ -68,7 +68,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3590123456789012"; // 3590 is outside 3528–3589
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "353011133330000"; // 15 digits but not legacy prefix
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3530a11133300000";
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

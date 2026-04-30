@@ -68,7 +68,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "6112345678901265"; // Starts with 61
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "62123456789002"; // 14 digits, sandbox test
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -86,7 +86,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "62123456789000000021"; // 20 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -95,7 +95,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "62123456a8901265"; // Contains a letter
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
     }
 }

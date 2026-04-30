@@ -58,7 +58,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "305693090259041"; // 15 digits, should fail
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -67,7 +67,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "31569309025904"; // invalid 31 prefix
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -76,7 +76,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "3056a9309025904";
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]

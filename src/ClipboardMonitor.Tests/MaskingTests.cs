@@ -36,15 +36,11 @@ namespace ClipboardMonitor.Tests
         }
 
         [TestMethod]
-        public void Test_Mask_Null_Throws()
-        {
-            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(null));
-        }
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+        public void Test_Mask_Null_Throws() => Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(null));
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
         [TestMethod]
-        public void Test_Mask_Empty_Throws()
-        {
-            Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(string.Empty));
-        }
+        public void Test_Mask_Empty_Throws() => Assert.ThrowsExactly<ArgumentException>(() => PANHelper.Mask(string.Empty));
     }
 }

@@ -132,7 +132,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "5412345678901234"; // Mastercard
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -141,7 +141,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "67596498264"; // 11 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -150,7 +150,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "67596498264384531234"; // 20 digits
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
@@ -159,7 +159,7 @@ namespace ClipboardMonitor.Tests
             const string cardNumber = "6759a49826438453";
             var result = PANHelper.TryParse(cardNumber, out var _);
 
-            Assert.IsTrue(result);
+            Assert.IsFalse(result);
         }
     }
 }

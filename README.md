@@ -35,9 +35,15 @@ USAGE: ClipboardMonitor [ARGUMENTS]
 
 ```
 
+### Practical usage notes
+* The risky-copy detector only evaluates text copied from common browsers; normal copy/paste from other apps is ignored unless PAN-DLP rules match.
+* Alert correlation window is **30 seconds**: if a risky copy is followed by **Win + R** or **Win + X -> I**, a warning toast is shown and an event is logged.
+* PAN detection masks card numbers before logging and then replaces clipboard contents to reduce accidental exfiltration.
+* `--install` / `--uninstall` are one-time admin operations for Event Log source setup; day-to-day runtime does **not** require elevation.
+* 
 ### WARNING
 ClipboardMonitor itself runs fine under a standard user account.  
-An optional `ENABLE_CRITICAL_PROCESS` block (currently **commented-out** for safety) can mark the process as critical; if re-enabled and the process is forcibly terminated, Windows will bug-check with **CRITICAL_PROCESS_DIED**. Enable only in hardened production builds—**never during normal development**.
+An optional `ENABLE_CRITICAL_PROCESS` block (currently **commented-out** for safety) can mark the process as critical; if re-enabled and the process is forcibly terminated, Windows will bug-check with **CRITICAL_PROCESS_DIED**. Enable only in hardened production buildsâ€”**never during normal development**.
 
 ## Development
 The application and test projects are built with **.NET Framework 4.8.1** and WPF/C# 7.x and using Winforms components when needed.
@@ -46,8 +52,8 @@ Open the solution in Visual Studio (with *.NET Desktop Development* workload).
 
 ## Acknowledgement
 I'd like to present my gratitute to;
-* **Tim MalcomVetter** for the [UnstoppableService](https://github.com/malcomvetter/UnstoppableService) that provides a single-executable Windows service with installer capability, similar to Sysmon.
-* **Gérald Barré, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
+* **Tim MalcomVetter** for the [UnstoppableService](https://github.com/malcomvetter/UnstoppableService), which inspired parts of the executable/bootstrap approach (this project does **not** install as a Windows service).
+* **GÃ©rald BarrÃ©, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
 * **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
 
 ## Icon

@@ -2,59 +2,98 @@
 
 [![Build and Test](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml/badge.svg)](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml)
 
-## Overview
-ClipboardMonitor is a lightweight background utility that tracks **clipboard** usage.
-It
+ClipboardMonitor is a Windows background utility focused on **clipboard abuse detection** and **payment-card data loss prevention (DLP)**.
 
-* filters text for high-risk tokens (`POWERSHELL`, `MSHTA`, `CMD`, `MSIEXEC`, toast-notification API keywords, etc.) copied **from well-known browsers**, and submits matches to **AMSI** for antivirus verdicts;
-* detects **payment-card PANs**, masks them, and scrubs the clipboard (sample DLP);
-* warns the user if they press **Win + R** *or* trigger **Win + X -> I** within 30 s of a risky copy;
-* logs every incident asynchronously to the Windows Event Log.
-* uses a toast notification to inform the user.
+![Two use cases of ClipboardMonitor: PAN detection, and malware detection in clipboard](screenshot.png)
 
-![Two use cases of ClipboardMonitor: PAN detection, and Malware detection in clipboard](/screenshot.png)
+## What it does
+
+ClipboardMonitor monitors clipboard text and can:
+
+- Detect suspicious command/script tokens (for example: `powershell`, `mshta`, `cmd`, `msiexec`, and toast-notification API terms).
+- Submit suspicious text to **AMSI** (Antimalware Scan Interface) for an antivirus verdict.
+- Detect payment-card PAN candidates (using brand checks + Luhn validation), then **mask** and **replace** clipboard content.
+- Correlate risky clipboard activity with suspicious launch behavior (for example, **Win + R** or **Win + X -> I** within a 30-second window).
+- Log incidents asynchronously to the **Windows Event Log**.
+- Notify users with a Windows toast.
+
+## How detection works (high level)
+
+1. Clipboard text changes are observed.
+2. Browser-originated text is evaluated for risky malware-related keywords.
+3. PAN-like values are evaluated against known card-brand rules and checksum validation.
+4. Confirmed risky content triggers AMSI scan and/or DLP masking behavior.
+5. Follow-on user actions are correlated and surfaced through logs + toast notifications.
+
+## Requirements
+
+- Windows (WPF + WinForms interop)
+- .NET Framework **4.8.1**
+- Administrator rights only for install/uninstall of the Event Log source
 
 ## Installation
-Logs are written to the Windows Event Log. Creating (or removing) the log source requires elevation.
 
-1. Open an **elevated** PowerShell / CMD window and run  
-   `ClipboardMonitor -i` (or `/i`, `--install`) to register the event-log source.  
-2. Launch `ClipboardMonitor.exe` normally (or place it in Startup / Task Scheduler).  
-3. Done.
+ClipboardMonitor writes to the Windows Event Log. Registering the log source requires elevation.
 
-### Uninstallation
-Run **as Administrator**:  
-`ClipboardMonitor -u` (or `/u`, `--uninstall`) to remove the event-log source.
+1. Open an **elevated** PowerShell or Command Prompt.
+2. Run:
 
-## Usage
+   ```powershell
+   ClipboardMonitor -i
+   ```
+
+   Supported install flags: `-i`, `/i`, `--install`
+
+3. Start `ClipboardMonitor.exe` normally.
+4. (Optional) Add it to Startup or Task Scheduler.
+
+## Uninstallation
+
+Run in an **elevated** shell:
+
+```powershell
+ClipboardMonitor -u
 ```
+
+Supported uninstall flags: `-u`, `/u`, `--uninstall`
+
+## CLI usage
+
+```text
 USAGE: ClipboardMonitor [ARGUMENTS]
--i,/i,--install      Registers the Windows-Event-Log source (Admin required).
--u,/u,--uninstall    Removes   the Windows-Event-Log source (Admin required).
--?, -h, /h, --help   Displays this message box.
 
+-i, /i, --install      Register Windows Event Log source (Admin required)
+-u, /u, --uninstall    Remove Windows Event Log source (Admin required)
+-?, -h, /h, --help     Show help message
 ```
 
-### Practical usage notes
-* The risky-copy detector only evaluates text copied from common browsers; normal copy/paste from other apps is ignored unless PAN-DLP rules match.
-* Alert correlation window is **30 seconds**: if a risky copy is followed by **Win + R** or **Win + X -> I**, a warning toast is shown and an event is logged.
-* PAN detection masks card numbers before logging and then replaces clipboard contents to reduce accidental exfiltration.
-* `--install` / `--uninstall` are one-time admin operations for Event Log source setup; day-to-day runtime does **not** require elevation.
-* 
-### WARNING
-ClipboardMonitor itself runs fine under a standard user account.  
-An optional `ENABLE_CRITICAL_PROCESS` block (currently **commented-out** for safety) can mark the process as critical; if re-enabled and the process is forcibly terminated, Windows will bug-check with **CRITICAL_PROCESS_DIED**. Enable only in hardened production builds—**never during normal development**.
+## Operational notes
+
+- Risky keyword evaluation is focused on clipboard text copied from common browsers.
+- PAN DLP behavior can still apply outside browser-copy scenarios.
+- Runtime execution does **not** require elevation after initial Event Log source setup.
+- Correlation window for follow-on launch behavior is **30 seconds**.
+
+## Safety warning
+
+ClipboardMonitor runs safely as a standard user process.
+
+There is an optional `ENABLE_CRITICAL_PROCESS` block in the codebase (commented out by default). If enabled, forcibly terminating the process can trigger a Windows bugcheck (`CRITICAL_PROCESS_DIED`). Keep this disabled during normal development and testing.
 
 ## Development
-The application and test projects are built with **.NET Framework 4.8.1** and WPF/C# 7.x and using Winforms components when needed.
 
-Open the solution in Visual Studio (with *.NET Desktop Development* workload).
+- Solution: `src/ClipboardMonitor.sln`
+- Main app: `src/ClipboardMonitor` (WPF app with some WinForms components)
+- Tests: `src/ClipboardMonitor.Tests`
 
-## Acknowledgement
-I'd like to present my gratitute to;
-* **Tim MalcomVetter** for the [UnstoppableService](https://github.com/malcomvetter/UnstoppableService), which inspired parts of the executable/bootstrap approach (this project does **not** install as a Windows service).
-* **Gérald Barré, aka. Meziantou** for the [AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
-* **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
+Open the solution in Visual Studio with the **.NET Desktop Development** workload installed.
 
-## Icon
+## Acknowledgements
+
+- **Tim MalcomVetter** for [UnstoppableService](https://github.com/malcomvetter/UnstoppableService), which inspired parts of the bootstrap approach (this project is not installed as a Windows service).
+- **Gérald Barré (Meziantou)** for the [Using Windows AMSI in .NET article](https://www.meziantou.net/using-windows-antimalware-scan-interface-in-dotnet.htm).
+- **Eric Lawrence** for ClipShield and his [attack-techniques article](https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/).
+
+## Icon attribution
+
 [Monitoring icons created by smashingstocks - Flaticon](https://www.flaticon.com/free-icons/monitoring)

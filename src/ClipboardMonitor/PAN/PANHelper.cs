@@ -160,7 +160,7 @@ namespace ClipboardMonitor.PAN
                 throw new PANException($"PAN too short to mask: {pan}");
             }
 
-            var stripped = new string(pan.Where(char.IsDigit).ToArray());
+            var stripped = new string([.. pan.Where(char.IsDigit)]);
             var first = stripped.Substring(0, 6);
             var last = stripped.Substring(stripped.Length - 4, 4);
             var middle = new string('*', stripped.Length - 10);

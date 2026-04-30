@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
+using ClipboardMonitor.Helpers;
 
 namespace ClipboardMonitor
 {
@@ -13,8 +14,8 @@ namespace ClipboardMonitor
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private ClipboardNotification _notification;
-        private PasteGuardWrapper _riskMonitor;
+        private ClipboardNotification? _notification;
+        private PasteGuardWrapper? _riskMonitor;
         private bool _disposedValue;
 
 

@@ -35,9 +35,6 @@ namespace ClipboardMonitor.AMSI
             return new AmsiSession(_context, session);
         }
 
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
+        public void Dispose() => _context.Dispose();
     }
 }

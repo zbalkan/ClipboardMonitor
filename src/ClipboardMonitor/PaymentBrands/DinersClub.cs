@@ -7,7 +7,7 @@ namespace ClipboardMonitor.PaymentBrands
         private const string _brand = "Diners Club";
 
         // Diners Club: 300–305, 3095, 36, 38–39 (14 digits, allow spaces/dashes)
-        private readonly Regex _pattern = new Regex(
+        private readonly Regex _pattern = new(
             @"(?:\D|^)((?:30[0-5][0-9]|3095|36[0-9]{2}|3[89][0-9]{2})(?:[ \-]?[0-9]){10})(?:\D|$)",
             RegexOptions.Compiled);
 

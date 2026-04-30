@@ -1,4 +1,4 @@
-﻿namespace ClipboardMonitor
+﻿namespace ClipboardMonitor.Helpers
 {
     using Microsoft.Win32;
 
@@ -11,23 +11,21 @@
         {
             try
             {
-                using (var key = Registry.CurrentUser.OpenSubKey(
-                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                using var key = Registry.CurrentUser.OpenSubKey(
+                    @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                if (key == null)
                 {
-                    if (key == null)
-                    {
-                        return false;
-                    }
-
-                    var value = key.GetValue("AppsUseLightTheme");
-                    if (value == null)
-                    {
-                        return false;
-                    }
-
-                    var intValue = (int)value;
-                    return intValue == 0; // 0 = Dark mode, 1 = Light mode
+                    return false;
                 }
+
+                var value = key.GetValue("AppsUseLightTheme");
+                if (value == null)
+                {
+                    return false;
+                }
+
+                var intValue = (int)value;
+                return intValue == 0; // 0 = Dark mode, 1 = Light mode
             }
             catch
             {

@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Windows.Forms;
 
-namespace ClipboardMonitor
+namespace ClipboardMonitor.Helpers
 {
     public static class ClipboardHelper
     {

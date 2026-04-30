@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using ClipboardMonitor.Helpers;
 using Windows.UI.Notifications;
 
 namespace ClipboardMonitor
@@ -11,7 +12,7 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly Scanner _scanner;
-            private static string _appId;
+            private static string? _appId;
             public NotificationHandlerForm(string appId)
             {
                 _appId = appId;

@@ -1,13 +1,14 @@
 ﻿using System;
+using ClipboardMonitor.Helpers;
 
 namespace ClipboardMonitor
 {
     public class AlertHandler
     {
-        private static readonly Lazy<AlertHandler> LazyInstance = new Lazy<AlertHandler>(() => new AlertHandler());
+        private static readonly Lazy<AlertHandler> LazyInstance = new(() => new AlertHandler());
         public static readonly AlertHandler Instance = LazyInstance.Value;
 
-        public string SubstituteText { get; set; }
+        public string SubstituteText { get; set; } = "This content has been removed for your safety.";
 
         internal void InvokeAlert(Alert alert)
         {

@@ -5,10 +5,10 @@ namespace ClipboardMonitor
 {
     public class DelegateCommand : ICommand
     {
-        public Action CommandAction { get; set; }
-        public Func<bool> CanExecuteFunc { get; set; }
+        public Action? CommandAction { get; set; }
+        public Func<bool>? CanExecuteFunc { get; set; }
 
-        public void Execute(object parameter) => CommandAction();
+        public void Execute(object parameter) => CommandAction?.Invoke();
 
         public bool CanExecute(object parameter) => CanExecuteFunc == null || CanExecuteFunc();
 

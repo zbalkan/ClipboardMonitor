@@ -7,7 +7,7 @@ namespace ClipboardMonitor.PaymentBrands
         private const string _brand = "UnionPay";
 
         // UnionPay: 62 + 14–17 digits (16–19 total), allow spaces/dashes
-        private readonly Regex _pattern = new Regex(
+        private readonly Regex _pattern = new(
             @"(?:\D|^)(62(?:[ \-]?[0-9]){14,17})(?=\D|$)",
             RegexOptions.Compiled);
 

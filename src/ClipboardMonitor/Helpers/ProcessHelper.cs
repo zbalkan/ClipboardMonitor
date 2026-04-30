@@ -6,7 +6,7 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
 
-namespace ClipboardMonitor
+namespace ClipboardMonitor.Helpers
 {
     public static class ProcessHelper
     {
@@ -22,7 +22,7 @@ namespace ClipboardMonitor
             return count > 1;
         }
 
-        public static ProcessSummary GetClipboardOwnerProcess()
+        public static ProcessSummary? GetClipboardOwnerProcess()
         {
             try
             {
@@ -115,7 +115,7 @@ namespace ClipboardMonitor
             _ = NativeMethods.NtSetInformationProcess(Process.GetCurrentProcess().Handle, BreakOnTermination, ref isCritical, sizeof(int));
         }
 
-        private static Process FindProcessById(int processId)
+        private static Process? FindProcessById(int processId)
         {
             Process process;
 

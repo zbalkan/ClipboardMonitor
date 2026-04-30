@@ -15,14 +15,14 @@ namespace ClipboardMonitor
         private static readonly TimeSpan Window = TimeSpan.FromSeconds(LAST_N_SECONDS);
 
         private static IntPtr _lastRunDialog = IntPtr.Zero;
-        private static ProcessSummary _processSummary;
-        private static Action<ProcessSummary, string> _registeredAction;
+        private static ProcessSummary? _processSummary;
+        private static Action<ProcessSummary, string>? _registeredAction;
         private static string _riskContent = string.Empty;
         private static long _riskUtcTicks;
         private static long _lastWinXUtcTicks;
         private static IntPtr _winEventHookForeground = IntPtr.Zero;
         private static IntPtr _keyboardHook = IntPtr.Zero;
-        private static ProcessSummary BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
+        private static ProcessSummary? BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
         private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
 
         public static void Install()
@@ -93,7 +93,12 @@ namespace ClipboardMonitor
                     var ticksSinceWinX = DateTime.UtcNow.Ticks - Volatile.Read(ref _lastWinXUtcTicks);
                     if (ticksSinceWinX <= Window.Ticks && IsRecentRisk())
                     {
-                        Task.Run(() => _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent));
+                        _ = Task.Run(() => {
+                            if (BrowserProcessSummary != null)
+                            {
+                                _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent);
+                            }
+                        });
                     }
                 }
             }
@@ -121,26 +126,29 @@ namespace ClipboardMonitor
                 NativeMethods.GetWindowThreadProcessId(hwnd, out var pid);
                 try
                 {
-                    using (var proc = Process.GetProcessById((int)pid))
+                    using var proc = Process.GetProcessById((int)pid);
+                    var exeName = proc.ProcessName;
+
+                    if (exeName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
                     {
-                        var exeName = proc.ProcessName;
-
-                        if (exeName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
+                        if (hwnd == _lastRunDialog)
                         {
-                            if (hwnd == _lastRunDialog)
-                            {
-                                return;
-                            }
-
-                            _lastRunDialog = hwnd;
-
-                            if (!IsRecentRisk())
-                            {
-                                return;
-                            }
-
-                            Task.Run(() => _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent));
+                            return;
                         }
+
+                        _lastRunDialog = hwnd;
+
+                        if (!IsRecentRisk())
+                        {
+                            return;
+                        }
+
+                        _ = Task.Run(() => {
+                            if (BrowserProcessSummary != null)
+                            {
+                                _registeredAction?.Invoke(BrowserProcessSummary, CurrentRiskContent);
+                            }
+                        });
                     }
                 }
                 catch

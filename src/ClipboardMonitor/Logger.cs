@@ -13,15 +13,15 @@ namespace ClipboardMonitor
     {
         private const string Log = "ClipboardMonitor";
         private const string Source = "ClipboardMonitor";
-        private static readonly Lazy<Logger> LazyInstance = new Lazy<Logger>(() => new Logger());
+        private static readonly Lazy<Logger> LazyInstance = new(() => new Logger());
         public static readonly Logger Instance = LazyInstance.Value;
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cts = new();
         private readonly EventLog _log;
 
         private readonly BlockingCollection<LogItem> _queue =
-            new BlockingCollection<LogItem>(boundedCapacity: 1024);
+            new(boundedCapacity: 1024);
 
-        private readonly StringBuilder _sb = new StringBuilder(256);
+        private readonly StringBuilder _sb = new(256);
         private readonly string _username;
         private readonly Task _worker;
         private volatile bool _disposed;

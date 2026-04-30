@@ -16,8 +16,8 @@
     <Product>ClipboardMonitor</Product>
     <Company>Zafer Balkan</Company>
     <Copyright>Copyright © 2025</Copyright>
-    <Version>2.0.0.0</Version>
-    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.1.0.0</Version>
+    <FileVersion>2.1.0.0</FileVersion>
     
     <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     <StartupObject>ClipboardMonitor.Program</StartupObject>

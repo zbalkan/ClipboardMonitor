@@ -8,36 +8,37 @@ using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor
 {
-    public class PasteGuardWrapper : IDisposable
+    public sealed class PasteGuardWrapper : IDisposable
     {
-        private readonly BlockingCollection<(ProcessSummary processSummary, string content)> _warningQueue = new(16);
+        private const int QueueCapacity = 16;
+
+        private readonly ConcurrentQueue<(ProcessSummary processSummary, string content)> _warningQueue = new();
+        private readonly SemaphoreSlim _queueSignal = new(0);
         private readonly CancellationTokenSource _warningCts = new();
         private readonly Task _warningWorker;
+        private int _queueCount;
         private bool _disposed;
 
         public PasteGuardWrapper()
         {
             PasteGuard.Install();
-            PasteGuard.RegisterAction(WarningAction);
-            _warningWorker = Task.Factory.StartNew(ProcessWarnings, _warningCts.Token,
-                TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            PasteGuard.RegisterAction(EnqueueWarning);
+            _warningWorker = Task.Run(() => ProcessWarningsAsync(_warningCts.Token));
         }
 
         public static void NotifyPasteGuard(ProcessSummary processSummary, string content)
         {
             var candidate = content.Length > 200 ? content.Substring(0, 200) : content;
-            var masked = candidate;
 
             try
             {
-                masked = PANHelper.Mask(candidate);
+                PasteGuard.SetSuspiciousActivityContent(processSummary, PANHelper.Mask(candidate));
             }
             catch (Exception ex)
             {
                 Logger.Instance.LogError($"PAN masking failed while preparing paste-guard correlation content.\n{ex}", 31);
+                PasteGuard.SetSuspiciousActivityContent(processSummary, candidate);
             }
-
-            PasteGuard.SetSuspiciousActivityContent(processSummary, masked);
         }
 
         public void Dispose()
@@ -48,48 +49,54 @@ namespace ClipboardMonitor
             }
 
             PasteGuard.Remove();
-            _warningQueue.CompleteAdding();
             _warningCts.Cancel();
+            _queueSignal.Release();
+
             try
             {
                 _warningWorker.Wait(2000);
             }
-            catch
+            catch (AggregateException)
             {
-                // no-op
+                // expected during shutdown
             }
+
+            _queueSignal.Dispose();
             _warningCts.Dispose();
-            _warningQueue.Dispose();
             _disposed = true;
         }
 
-        private void WarningAction(ProcessSummary processSummary, string content)
+        private void EnqueueWarning(ProcessSummary processSummary, string content)
         {
-            if (_disposed || _warningQueue.IsAddingCompleted)
+            if (_disposed)
             {
                 return;
             }
 
-            if (!_warningQueue.TryAdd((processSummary, content)))
+            _warningQueue.Enqueue((processSummary, content));
+            var size = Interlocked.Increment(ref _queueCount);
+
+            while (size > QueueCapacity && _warningQueue.TryDequeue(out _))
             {
+                Interlocked.Decrement(ref _queueCount);
+                size--;
                 Logger.Instance.LogInfo("PasteGuard warning queue full; dropping oldest warning.", 38);
-                _warningQueue.TryTake(out _);
-                _ = _warningQueue.TryAdd((processSummary, content));
             }
+
+            _queueSignal.Release();
         }
 
-        private void ProcessWarnings()
+        private async Task ProcessWarningsAsync(CancellationToken cancellationToken)
         {
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                foreach (var item in _warningQueue.GetConsumingEnumerable(_warningCts.Token))
+                await _queueSignal.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                if (_warningQueue.TryDequeue(out var warning))
                 {
-                    ProcessWarning(item.processSummary, item.content);
+                    Interlocked.Decrement(ref _queueCount);
+                    ProcessWarning(warning.processSummary, warning.content);
                 }
-            }
-            catch (OperationCanceledException)
-            {
-                // expected during shutdown
             }
         }
 
@@ -102,36 +109,34 @@ namespace ClipboardMonitor
                             MessageBoxDefaultButton.Button1,
                             MessageBoxOptions.ServiceNotification);
 
-            var incidents = new StringBuilder(500);
-            incidents.AppendLine("Detected Run dialog following suspicious text copied from browser.");
+            var incidents = new StringBuilder(500)
+                .AppendLine("Detected Run dialog following suspicious text copied from browser.");
+
             if (processSummary == default)
             {
                 incidents
-                .Append("Suspicious content: ").AppendLine(content)
-                .AppendLine("Failed to get executable information")
-                .AppendLine("----------")
-                .AppendLine();
+                    .Append("Suspicious content: ").AppendLine(content)
+                    .AppendLine("Failed to get executable information");
             }
             else
             {
                 incidents
-                .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
-                .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                .AppendLine("Suspicious content: ")
-                .AppendLine("----------")
-                .AppendLine(content)
-                .AppendLine("----------")
-                .AppendLine();
+                    .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
+                    .Append("Source process name: ").AppendLine(processSummary.ProcessName)
+                    .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
+                    .AppendLine("Suspicious content: ")
+                    .AppendLine(content);
             }
-            var alert = new Alert
+
+            incidents.AppendLine("----------").AppendLine();
+
+            AlertHandler.Instance.InvokeAlert(new Alert
             {
                 Title = "Detected Run dialog following suspicious text copied from browser. Clipboard is cleared and overwritten.",
                 Detail = incidents.ToString(),
                 Payload = content,
                 ClearClipboard = true
-            };
-            AlertHandler.Instance.InvokeAlert(alert);
+            });
         }
     }
 }

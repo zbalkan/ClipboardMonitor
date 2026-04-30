@@ -8,11 +8,11 @@ using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor
 {
-    internal class Scanner : IDisposable
+    internal sealed class Scanner : IDisposable
     {
         private readonly AmsiContext _amsiContext;
         private readonly AmsiSession _amsiSession;
-        private bool disposedValue;
+        private bool _disposed;
 
         public Scanner()
         {
@@ -22,9 +22,7 @@ namespace ClipboardMonitor
 
         public Alert? Scan(string content)
         {
-            // The logic comes from Eric Lawrence's article: https://textslashplain.com/2024/06/04/attack-techniques-trojaned-clipboard/
             var processSummary = ProcessHelper.GetClipboardOwnerProcess();
-
             if (processSummary == null)
             {
                 return null;
@@ -35,13 +33,20 @@ namespace ClipboardMonitor
                 PasteGuardWrapper.NotifyPasteGuard(processSummary, content);
                 if (IsSuspicious(content))
                 {
-                    return CreateSuspiciousActivityAlert(processSummary, content);
+                    return CreateAlert("Suspicious content detected in clipboard.", processSummary, content, "Suspicious data", clearClipboard: false);
                 }
             }
+
             if (_amsiSession.IsMalware(content, "Clipboard"))
             {
-                return CreateMalwareAlert(processSummary, content);
+                return CreateAlert(
+                    "AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.",
+                    processSummary,
+                    content,
+                    "Suspicious content",
+                    clearClipboard: true);
             }
+
             if (PANHelper.TryParse(content, out var searchResult))
             {
                 return CreatePanAlert(processSummary, searchResult);
@@ -50,121 +55,62 @@ namespace ClipboardMonitor
             return null;
         }
 
-        private static Alert CreateMalwareAlert(ProcessSummary processSummary, string content)
+        private static Alert CreateAlert(string title, ProcessSummary processSummary, string payload, string contentLabel, bool clearClipboard)
         {
-            var incidents = new StringBuilder(500);
-
-            if (processSummary == default)
-            {
-                incidents
-                .Append("Suspicious content: ").AppendLine(content)
-                .AppendLine("Failed to get executable information")
-                .AppendLine("----------") // Used as delimiter
+            var incidents = BuildProcessContext(processSummary)
+                .Append(contentLabel).Append(": ").AppendLine(payload)
+                .AppendLine("----------")
                 .AppendLine();
-            }
-            else
-            {
-                incidents = new StringBuilder(500);
-                incidents
-                .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
-                .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                .Append("Suspicious content: ").AppendLine(content)
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-            }
 
             return new Alert
             {
-                Title = "AMSI detected malicious content in clipboard. Clipboard is cleared and overwritten.",
+                Title = title,
                 Detail = incidents.ToString(),
-                Payload = content,
-                ClearClipboard = true
+                Payload = payload,
+                ClearClipboard = clearClipboard
             };
         }
 
         private static Alert CreatePanAlert(ProcessSummary processSummary, IReadOnlyList<SuspectedPANData> searchResult)
         {
             var incidents = new StringBuilder(500);
-            if (processSummary == default)
+
+            foreach (var suspectedPan in searchResult)
             {
-                for (var i = 0; i < searchResult.Count; i++)
-                {
-                    var suspectedPan = searchResult[i];
-                    incidents
-                        .Append("Incident number: ").AppendLine((i + 1).ToString())
-                        .Append("Suspicious PAN data: ").AppendLine(suspectedPan.MaskedPAN)
-                        .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
-                        .AppendLine("Failed to get executable information")
-                        .AppendLine("----------") // Used as delimiter
-                        .AppendLine();
-                }
-            }
-            else
-            {
-                for (var i = 0; i < searchResult.Count; i++)
-                {
-                    var SuspiciousPan = searchResult[i];
-                    incidents
-                        .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
-                        .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                        .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                        .Append("Suspicious PAN data: ").AppendLine(SuspiciousPan.MaskedPAN)
-                        .Append("Probable payment brand: ").AppendLine(SuspiciousPan.PaymentBrand)
-                        .AppendLine("----------") // Used as delimiter
-                        .AppendLine();
-                }
+                incidents
+                    .Append(BuildProcessContext(processSummary))
+                    .Append("Suspicious PAN data: ").AppendLine(suspectedPan.MaskedPAN)
+                    .Append("Probable payment brand: ").AppendLine(suspectedPan.PaymentBrand)
+                    .AppendLine("----------")
+                    .AppendLine();
             }
 
             return new Alert
             {
                 Title = "Suspicious PAN data detected in clipboard. Clipboard is cleared and overwritten.",
                 Detail = incidents.ToString(),
-                Payload = string.Join(", ", [.. searchResult.Select(sr => sr.ToString())]),
+                Payload = string.Join(", ", searchResult.Select(sr => sr.ToString())),
                 ClearClipboard = true
             };
         }
 
-        private static Alert CreateSuspiciousActivityAlert(ProcessSummary processSummary, string content)
+        private static StringBuilder BuildProcessContext(ProcessSummary processSummary)
         {
-            var incidents = new StringBuilder(500);
-
             if (processSummary == default)
             {
-                incidents
-                .Append("Suspicious data: ").AppendLine(content)
-                .AppendLine("Failed to get executable information")
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
+                return new StringBuilder(200).AppendLine("Failed to get executable information");
             }
-            else
-            {
-                incidents
+
+            return new StringBuilder(300)
                 .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
                 .Append("Source process name: ").AppendLine(processSummary.ProcessName)
-                .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
-                .Append("Suspicious data: ").AppendLine(content)
-                .AppendLine("----------") // Used as delimiter
-                .AppendLine();
-            }
-
-            return new Alert
-            {
-                Title = "Suspicious content detected in clipboard.",
-                Detail = incidents.ToString(),
-                Payload = content,
-                ClearClipboard = false
-            };
+                .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath);
         }
 
-        private static bool IsCopiedFromBrowser()
-        {
-            var fromChromium = ClipboardHelper.HasDataFormat("Chromium internal source URL");
-            var fromFirefox = ClipboardHelper.HasDataFormat("text/x-moz-url-priv");
-            var fromIE = ClipboardHelper.HasDataFormat("msSourceUrl");
-
-            return fromChromium || fromFirefox || fromIE;
-        }
+        private static bool IsCopiedFromBrowser() =>
+            ClipboardHelper.HasDataFormat("Chromium internal source URL") ||
+            ClipboardHelper.HasDataFormat("text/x-moz-url-priv") ||
+            ClipboardHelper.HasDataFormat("msSourceUrl");
 
         private static bool IsSuspicious(string content)
         {
@@ -173,36 +119,21 @@ namespace ClipboardMonitor
                 return false;
             }
 
-            var normalised = content
-                    .Normalize(NormalizationForm.FormKD)
-                    .ToLowerInvariant();
-
+            var normalised = content.Normalize(NormalizationForm.FormKD).ToLowerInvariant();
             return SuspiciousContent.HasSuspiciousText(normalised);
         }
 
-        #region Dispose
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
+            if (_disposed)
+            {
+                return;
+            }
+
+            _amsiSession.Dispose();
+            _amsiContext.Dispose();
+            _disposed = true;
             GC.SuppressFinalize(this);
         }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _amsiSession.Dispose();
-                    _amsiContext.Dispose();
-                }
-
-                disposedValue = true;
-            }
-        }
-
-        #endregion Dispose
     }
 }

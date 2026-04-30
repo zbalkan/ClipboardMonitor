@@ -1,6 +1,7 @@
 # ClipboardMonitor
 
-[![Build and Test](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml/badge.svg)](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/msbuild.yml)
+[![Tests](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/pr-tests.yml/badge.svg)](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/pr-tests.yml)
+[![Dependabot Updates](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/zbalkan/ClipboardMonitor/actions/workflows/dependabot/dependabot-updates)
 
 ClipboardMonitor is a Windows background utility focused on **clipboard abuse detection** and **payment-card data loss prevention (DLP)**.
 

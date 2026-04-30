@@ -80,25 +80,12 @@ namespace ClipboardMonitor.Helpers
                     Logger.Instance.LogInfo("Unable to read process MainModule.FileName for clipboard owner process.", 36);
                 }
 
-                // Get main module
-                var module = string.Empty;
-
-                try
-                {
-                    module = process.MainModule?.ModuleName;
-                }
-                catch (Exception)
-                {
-                    Logger.Instance.LogInfo("Unable to read process MainModule.ModuleName for clipboard owner process.", 37);
-                }
-
                 // Create the struct that carries basic info
                 return new ProcessSummary
                 {
                     ProcessName = process.ProcessName,
                     ExecutablePath = executablePath,
-                    WindowTitle = windowTitle,
-                    MainModuleName = module
+                    WindowTitle = windowTitle
                 };
             }
             catch (Exception ex)

@@ -75,12 +75,6 @@ USAGE: ClipboardMonitor [ARGUMENTS]
 - Runtime execution does **not** require elevation after initial Event Log source setup.
 - Correlation window for follow-on launch behavior is **30 seconds**.
 
-## Safety warning
-
-ClipboardMonitor runs safely as a standard user process.
-
-There is an optional `ENABLE_CRITICAL_PROCESS` block in the codebase (commented out by default). If enabled, forcibly terminating the process can trigger a Windows bugcheck (`CRITICAL_PROCESS_DIED`). Keep this disabled during normal development and testing.
-
 ## Development
 
 - Solution: `src/ClipboardMonitor.sln`

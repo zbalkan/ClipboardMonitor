@@ -13,13 +13,11 @@ namespace ClipboardMonitor
 
         private bool _disposedValue;
 
-        private static string? _appId;
 
         public ClipboardNotification()
         {
-            _appId = Helpers.AppIdHelper.EnsureAppId();
-
-            _notificationForm = new NotificationHandlerForm(_appId);
+            var appId = Helpers.AppIdHelper.EnsureAppId();
+            _notificationForm = new NotificationHandlerForm(appId);
         }
 
         public void Dispose()

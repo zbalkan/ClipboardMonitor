@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -9,11 +10,12 @@ using ClipboardMonitor.Helpers;
 
 namespace ClipboardMonitor
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application, IDisposable
     {
+        private static readonly HashSet<string> InstallArgs = new(StringComparer.Ordinal) { "-i", "/i", "--install" };
+        private static readonly HashSet<string> UninstallArgs = new(StringComparer.Ordinal) { "-u", "/u", "--uninstall" };
+        private static readonly HashSet<string> HelpArgs = new(StringComparer.Ordinal) { "-?", "-h", "/h", "--help" };
+
         private ClipboardNotification? _notification;
         private bool _disposedValue;
 
@@ -51,78 +53,28 @@ namespace ClipboardMonitor
         private static void HandleArguments()
         {
             var args = Environment.GetCommandLineArgs();
-
-            if (IsArgumentCountInvalid(args))
+            if (args.Length > 2)
             {
                 throw new ArgumentException($"Invalid arguments: {string.Join(" ", args)}");
             }
 
-            if (IsNormalStart(args))
+            if (args.Length == 1)
             {
                 return;
             }
 
-            if (IsInstallCommand(args))
+            var command = args[1];
+            if (InstallArgs.Contains(command))
             {
-                try
-                {
-                    if (Logger.Instance.Check())
-                    {
-                        const string message = "ClipboardMonitor is already installed.";
-                        MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information,
-                            MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                    }
-                    else
-                    {
-                        Logger.Instance.Install(); // Creates the event log source
-
-                        const string message = "Installation completed.";
-                        MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information,
-                            MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                    }
-                }
-                catch (SecurityException ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    const string message = "You need to run as administrator first to install the application.";
-                    _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error,
-                        MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                }
-                finally
-                {
-                    Environment.Exit(0);
-                }
+                HandleInstall();
             }
-            else if (IsUninstallCommand(args))
+            else if (UninstallArgs.Contains(command))
             {
-                try
-                {
-                    Logger.Instance.Uninstall(); // Creates the event log source
-
-                    const string message = "Uninstallation completed.";
-                    MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information,
-                        MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                }
-                catch (Win32Exception ex)
-                {
-                    Debug.WriteLine(ex.Message);
-                    const string message = "You need to run as administrator first to uninstall the application.";
-                    _ = MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error,
-                        MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-                }
-                finally
-                {
-                    Environment.Exit(0);
-                }
+                HandleUninstall();
             }
-            else if (IsHelpCommand(args))
+            else if (HelpArgs.Contains(command))
             {
-                const string message =
-                    "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
-                _ = MessageBox.Show(message, "Help", MessageBoxButton.OK, MessageBoxImage.Information,
-                    MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
-
-                Environment.Exit(0);
+                ShowHelp();
             }
             else
             {
@@ -130,25 +82,62 @@ namespace ClipboardMonitor
             }
         }
 
-        private static bool IsNormalStart(string[] args) => args.Length == 1;
+        private static void HandleInstall()
+        {
+            try
+            {
+                if (Logger.Instance.Check())
+                {
+                    MessageBox.Show("ClipboardMonitor is already installed.", "Success", MessageBoxButton.OK, MessageBoxImage.Information,
+                        MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                }
+                else
+                {
+                    Logger.Instance.Install();
+                    MessageBox.Show("Installation completed.", "Success", MessageBoxButton.OK, MessageBoxImage.Information,
+                        MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+                }
+            }
+            catch (SecurityException ex)
+            {
+                Debug.WriteLine(ex.Message);
+                _ = MessageBox.Show("You need to run as administrator first to install the application.", "Error", MessageBoxButton.OK, MessageBoxImage.Error,
+                    MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            }
+            finally
+            {
+                Environment.Exit(0);
+            }
+        }
 
-        private static bool IsHelpCommand(string[] args) =>
-            (args.Length == 2) && (args[1].Equals("-?", StringComparison.Ordinal) ||
-                                    args[1].Equals("-h", StringComparison.Ordinal) ||
-                                    args[1].Equals("/h", StringComparison.Ordinal) ||
-                                    args[1].Equals("--help", StringComparison.Ordinal));
+        private static void HandleUninstall()
+        {
+            try
+            {
+                Logger.Instance.Uninstall();
+                MessageBox.Show("Uninstallation completed.", "Success", MessageBoxButton.OK, MessageBoxImage.Information,
+                    MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            }
+            catch (Win32Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+                _ = MessageBox.Show("You need to run as administrator first to uninstall the application.", "Error", MessageBoxButton.OK, MessageBoxImage.Error,
+                    MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            }
+            finally
+            {
+                Environment.Exit(0);
+            }
+        }
 
-        private static bool IsUninstallCommand(string[] args) =>
-            (args.Length == 2) && (args[1].Equals("-u", StringComparison.Ordinal) ||
-                                    args[1].Equals("/u", StringComparison.Ordinal) ||
-                                    args[1].Equals("--uninstall", StringComparison.Ordinal));
-
-        private static bool IsInstallCommand(string[] args) =>
-            (args.Length == 2) && (args[1].Equals("-i", StringComparison.Ordinal) ||
-                                    args[1].Equals("/i", StringComparison.Ordinal) ||
-                                    args[1].Equals("--install", StringComparison.Ordinal));
-
-        private static bool IsArgumentCountInvalid(string[] args) => args.Length > 2;
+        private static void ShowHelp()
+        {
+            const string message =
+                "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
+            _ = MessageBox.Show(message, "Help", MessageBoxButton.OK, MessageBoxImage.Information,
+                MessageBoxResult.OK, MessageBoxOptions.DefaultDesktopOnly);
+            Environment.Exit(0);
+        }
 
         private void SetupExceptionHandling()
         {
@@ -181,22 +170,19 @@ namespace ClipboardMonitor
             finally
             {
                 Logger.Instance.LogError($"{message}\n{exception}", 3);
-                //ProcessHelper.UnsetCriticalProcess();
-                Environment.Exit(1); // We don't want this to freeze
+                Environment.Exit(1);
             }
         }
 
         private void OnExit(object sender, ExitEventArgs e)
         {
             Logger.Instance.LogInfo("ClipboardMonitor is shutting down.", 11);
-            //ProcessHelper.UnsetCriticalProcess();
             base.OnExit(e);
         }
 
         private void OnSessionEnding(object sender, SessionEndingCancelEventArgs e)
         {
             e.Cancel = true;
-            //ProcessHelper.UnsetCriticalProcess();
             e.Cancel = false;
             base.OnSessionEnding(e);
         }

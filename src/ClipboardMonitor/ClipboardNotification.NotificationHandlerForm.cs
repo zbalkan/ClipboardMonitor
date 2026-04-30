@@ -12,11 +12,11 @@ namespace ClipboardMonitor
         private sealed class NotificationHandlerForm : Form
         {
             private readonly Scanner _scanner;
-            private static string? _appId;
+            private readonly string _appId;
 
             public NotificationHandlerForm(string appId)
             {
-                _appId = appId;
+                _appId = appId ?? throw new ArgumentNullException(nameof(appId));
                 _scanner = new Scanner();
 
                 //Turn the child window into a message-only window (refer to Microsoft docs)

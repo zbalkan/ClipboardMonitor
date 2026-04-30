@@ -19,6 +19,7 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
+        SetupExceptionHandling();
         HandleArguments();
 
         if (!Logger.Instance.Check())
@@ -35,7 +36,6 @@ internal static class Program
         }
 
         ProcessHelper.Cover();
-        SetupExceptionHandling();
 
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
@@ -131,6 +131,12 @@ internal static class Program
             _ = MessageBox.Show("You need to run as administrator first to uninstall the application.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error,
                 MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         }
+        catch (InvalidOperationException ex)
+        {
+            Debug.WriteLine(ex.Message);
+            _ = MessageBox.Show($"Uninstallation failed: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error,
+                MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+        }
         finally
         {
             Environment.Exit(0);
@@ -140,7 +146,7 @@ internal static class Program
     private static void ShowHelp()
     {
         const string message =
-            "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tInstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
+            "USAGE: ClipboardMonitor [ARGUMENTS]\n\n-i,/i,--install\tInstalls the application (Needs Admin rights).\n-u,/u,--uninstall\tUninstalls the application (Needs Admin rights).\n-?, -h, /h, --help\tDisplays this message box.";
         _ = MessageBox.Show(message, "Help", MessageBoxButtons.OK, MessageBoxIcon.Information,
             MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
         Environment.Exit(0);

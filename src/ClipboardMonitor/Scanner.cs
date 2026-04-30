@@ -30,7 +30,7 @@ namespace ClipboardMonitor
 
             if (IsCopiedFromBrowser())
             {
-                PasteGuardWrapper.NotifyPasteGuard(processSummary, content);
+                PasteGuard.NotifySuspiciousClipboard(processSummary, content);
                 if (IsSuspicious(content))
                 {
                     return CreateAlert("Suspicious content detected in clipboard.", processSummary, content, "Suspicious data", clearClipboard: false);

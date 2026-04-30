@@ -1,9 +1,12 @@
-﻿using System;
+using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using ClipboardMonitor.PAN;
 
 namespace ClipboardMonitor
 {
@@ -13,39 +16,53 @@ namespace ClipboardMonitor
         private static readonly NativeMethods.WinEventDelegate _winEventProc = WinEventCallback;
         private static readonly NativeMethods.LowLevelKeyboardProc _keyboardProc = KeyboardHookCallback;
         private static readonly TimeSpan Window = TimeSpan.FromSeconds(LAST_N_SECONDS);
+        private static readonly TimeSpan AlertCooldown = TimeSpan.FromSeconds(5);
 
         private static IntPtr _lastRunDialog = IntPtr.Zero;
         private static ProcessSummary? _processSummary;
-        private static Action<ProcessSummary, string>? _registeredAction;
         private static string _riskContent = string.Empty;
         private static long _riskUtcTicks;
         private static long _lastWinXUtcTicks;
         private static long _lastAlertUtcTicks;
-        private static int _alertDispatchInProgress;
+        private static readonly ConcurrentQueue<(ProcessSummary processSummary, string content)> _alertQueue = new ConcurrentQueue<(ProcessSummary processSummary, string content)>();
+        private static readonly SemaphoreSlim _alertSignal = new SemaphoreSlim(0);
+        private static CancellationTokenSource? _alertCts;
+        private static Task? _alertWorker;
         private static IntPtr _winEventHookForeground = IntPtr.Zero;
         private static IntPtr _keyboardHook = IntPtr.Zero;
-        private static readonly TimeSpan AlertCooldown = TimeSpan.FromSeconds(5);
-        private static ProcessSummary? BrowserProcessSummary => Volatile.Read(ref _processSummary) ?? default;
-        private static string CurrentRiskContent => Volatile.Read(ref _riskContent) ?? string.Empty;
 
-        public static void Install()
+        private static bool _initialized;
+
+        public static void Initialize()
         {
+            if (_initialized)
+            {
+                return;
+            }
+
             if (_winEventHookForeground == IntPtr.Zero)
             {
-                _winEventHookForeground = NativeMethods.SetWinEventHook(NativeMethods.EVENT_SYSTEM_FOREGROUND, NativeMethods.EVENT_SYSTEM_FOREGROUND,
-                    IntPtr.Zero, _winEventProc, 0, 0, NativeMethods.WINEVENT_OUTOFCONTEXT);
+                _winEventHookForeground = NativeMethods.SetWinEventHook(
+                    NativeMethods.EVENT_SYSTEM_FOREGROUND,
+                    NativeMethods.EVENT_SYSTEM_FOREGROUND,
+                    IntPtr.Zero,
+                    _winEventProc,
+                    0,
+                    0,
+                    NativeMethods.WINEVENT_OUTOFCONTEXT);
             }
 
             if (_keyboardHook == IntPtr.Zero)
             {
                 _keyboardHook = NativeMethods.SetWindowsHookEx(NativeMethods.WH_KEYBOARD_LL, _keyboardProc, IntPtr.Zero, 0);
             }
+
+            _alertCts = new CancellationTokenSource();
+            _alertWorker = Task.Run(() => ProcessAlertsAsync(_alertCts.Token));
+            _initialized = true;
         }
 
-        public static void RegisterAction(Action<ProcessSummary, string> action) =>
-                    _registeredAction = action ?? throw new ArgumentNullException(nameof(action));
-
-        public static void Remove()
+        public static void Dispose()
         {
             if (_winEventHookForeground != IntPtr.Zero)
             {
@@ -58,13 +75,42 @@ namespace ClipboardMonitor
                 NativeMethods.UnhookWindowsHookEx(_keyboardHook);
                 _keyboardHook = IntPtr.Zero;
             }
+
+            _alertCts?.Cancel();
+            _alertSignal.Release();
+
+            try
+            {
+                _alertWorker?.Wait(2000);
+            }
+            catch (AggregateException)
+            {
+                // expected during shutdown
+            }
+
+            _alertWorker = null;
+            _alertCts?.Dispose();
+            _alertCts = null;
+
+            while (_alertQueue.TryDequeue(out _)) { }
+            _initialized = false;
         }
 
-        public static void SetSuspiciousActivityContent(ProcessSummary processSummary, string content)
+        public static void NotifySuspiciousClipboard(ProcessSummary processSummary, string content)
         {
+            var candidate = content.Length > 200 ? content.Substring(0, 200) : content;
+            try
+            {
+                candidate = PANHelper.Mask(candidate);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError($"PAN masking failed while preparing paste-guard correlation content.\n{ex}", 31);
+            }
+
             Volatile.Write(ref _riskUtcTicks, DateTime.UtcNow.Ticks);
             Volatile.Write(ref _processSummary, processSummary);
-            Volatile.Write(ref _riskContent, content);
+            Volatile.Write(ref _riskContent, candidate);
         }
 
         private static string GetClassName(IntPtr hWnd)
@@ -74,51 +120,95 @@ namespace ClipboardMonitor
             return sb.ToString();
         }
 
-        private static bool IsRecentRisk() =>
-            DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
+        private static bool IsRecentRisk() => DateTime.UtcNow.Ticks - Volatile.Read(ref _riskUtcTicks) <= Window.Ticks;
 
-        private static bool CanDispatchAlert()
-        {
-            var nowTicks = DateTime.UtcNow.Ticks;
-            var sinceLastAlert = nowTicks - Volatile.Read(ref _lastAlertUtcTicks);
-            if (sinceLastAlert < AlertCooldown.Ticks)
-            {
-                return false;
-            }
-
-            return Interlocked.CompareExchange(ref _alertDispatchInProgress, 1, 0) == 0;
-        }
+        private static bool CanDispatchAlert() =>
+            DateTime.UtcNow.Ticks - Volatile.Read(ref _lastAlertUtcTicks) >= AlertCooldown.Ticks;
 
         private static void DispatchAlertAsync()
         {
-            if (!CanDispatchAlert())
+            if (!_initialized || !CanDispatchAlert())
             {
                 return;
             }
 
-            var snapshotProcessSummary = BrowserProcessSummary;
-            var snapshotContent = CurrentRiskContent;
+            var snapshotProcessSummary = Volatile.Read(ref _processSummary);
+            var snapshotContent = Volatile.Read(ref _riskContent) ?? string.Empty;
 
             if (snapshotProcessSummary == default || string.IsNullOrWhiteSpace(snapshotContent))
             {
-                Interlocked.Exchange(ref _alertDispatchInProgress, 0);
                 return;
             }
 
-            _ = Task.Run(() => {
+            _alertQueue.Enqueue((snapshotProcessSummary, snapshotContent));
+            _alertSignal.Release();
+        }
+
+        private static async Task ProcessAlertsAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
                 try
                 {
-                    _registeredAction?.Invoke(snapshotProcessSummary, snapshotContent);
+                    await _alertSignal.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+                    if (!_alertQueue.TryDequeue(out var alert))
+                    {
+                        continue;
+                    }
+
+                    if (!CanDispatchAlert())
+                    {
+                        continue;
+                    }
+
+                    ShowWarningAndAlert(alert.processSummary, alert.content);
                     Volatile.Write(ref _lastAlertUtcTicks, DateTime.UtcNow.Ticks);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
                 catch (Exception ex)
                 {
                     Logger.Instance.LogError($"PasteGuard alert action failed.\n{ex}", 34);
                 }
-                finally
-                {
-                    Interlocked.Exchange(ref _alertDispatchInProgress, 0);
-                }
+            }
+        }
+
+        private static void ShowWarningAndAlert(ProcessSummary processSummary, string content)
+        {
+            MessageBox.Show(
+                $"Do not paste web content into the Run dialog unless you fully trust the source.\nCopied content:\n\n{content}",
+                "Danger!",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button1,
+                MessageBoxOptions.ServiceNotification);
+
+            var incidents = new StringBuilder(500).AppendLine("Detected Run dialog following suspicious text copied from browser.");
+            if (processSummary == default)
+            {
+                incidents.Append("Suspicious content: ").AppendLine(content).AppendLine("Failed to get executable information");
+            }
+            else
+            {
+                incidents
+                    .Append("Source application window: ").AppendLine(processSummary.WindowTitle)
+                    .Append("Source process name: ").AppendLine(processSummary.ProcessName)
+                    .Append("Source executable path: ").AppendLine(processSummary.ExecutablePath)
+                    .AppendLine("Suspicious content: ")
+                    .AppendLine(content);
+            }
+
+            incidents.AppendLine("----------").AppendLine();
+
+            AlertHandler.Instance.InvokeAlert(new Alert
+            {
+                Title = "Detected Run dialog following suspicious text copied from browser. Clipboard is cleared and overwritten.",
+                Detail = incidents.ToString(),
+                Payload = content,
+                ClearClipboard = true
             });
         }
 
@@ -148,45 +238,20 @@ namespace ClipboardMonitor
             return NativeMethods.CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
         }
 
-        private static void WinEventCallback(
-             IntPtr hWinEventHook,
-             uint eventType,
-             IntPtr hwnd,
-             int idObject,
-             int idChild,
-             uint dwEventThread,
-             uint dwmsEventTime)
+        private static void WinEventCallback(IntPtr hWinEventHook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime)
         {
-            if (hwnd == IntPtr.Zero || idObject != 0) // OBJID_WINDOW only
-            {
-                return;
-            }
+            if (hwnd == IntPtr.Zero || idObject != 0) return;
 
-            var cls = GetClassName(hwnd);
-            if (cls == "#32770")
+            if (GetClassName(hwnd) == "#32770")
             {
                 NativeMethods.GetWindowThreadProcessId(hwnd, out var pid);
                 try
                 {
                     using var proc = Process.GetProcessById((int)pid);
-                    var exeName = proc.ProcessName;
-
-                    if (exeName.Equals("explorer", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (hwnd == _lastRunDialog)
-                        {
-                            return;
-                        }
-
-                        _lastRunDialog = hwnd;
-
-                        if (!IsRecentRisk())
-                        {
-                            return;
-                        }
-
-                        DispatchAlertAsync();
-                    }
+                    if (!proc.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase)) return;
+                    if (hwnd == _lastRunDialog) return;
+                    _lastRunDialog = hwnd;
+                    if (IsRecentRisk()) DispatchAlertAsync();
                 }
                 catch (Exception ex)
                 {

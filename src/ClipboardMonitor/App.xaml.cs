@@ -15,7 +15,6 @@ namespace ClipboardMonitor
     public partial class App : Application, IDisposable
     {
         private ClipboardNotification? _notification;
-        private PasteGuardWrapper? _riskMonitor;
         private bool _disposedValue;
 
         [STAThread]
@@ -46,7 +45,7 @@ namespace ClipboardMonitor
             AlertHandler.Instance.SubstituteText = "REDACTED";
 
             _notification = new ClipboardNotification();
-            _riskMonitor = new PasteGuardWrapper();
+            PasteGuard.Initialize();
         }
 
         private static void HandleArguments()
@@ -213,7 +212,7 @@ namespace ClipboardMonitor
             {
                 ProcessHelper.Uncover();
                 _notification?.Dispose();
-                _riskMonitor?.Dispose();
+                PasteGuard.Dispose();
             }
 
             _disposedValue = true;
